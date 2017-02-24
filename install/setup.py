@@ -10,6 +10,11 @@ import os
 import sys
 import shutil
 
+# check python version
+if sys.version_info.major != 2 and sys.version_info.minor != 7:
+    print 'Run this script with Python2.7!'
+    sys.exit(1)
+
 PYMLINK_VERSION = 'py_mlink'
 os_name = platform.system()
 lib_ext = None

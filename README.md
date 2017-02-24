@@ -6,8 +6,8 @@ The package works on Windows and Linux with Python 2.7.
 
 ## Installation
 
-To install this package:
-1. Open install directory. 
+To install this package:<br />
+1. Open install directory.<br /> 
 2. Run `python setup.py install`. (if Linux, admin privileges required)
 
 
