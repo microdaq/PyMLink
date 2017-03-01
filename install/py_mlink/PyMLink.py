@@ -403,6 +403,9 @@ class MLink:
             polarity - analog input polarity (%T - bipolar, %F - unipolar)
             mode - measurement type (AIMode.AI_SINGLE or AIMode.AI_DIFF)
         """
+        if not isinstance(channels, list):
+            channels = [channels]
+
         self._ai_scan_channels = channels
         channels_idx = c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
