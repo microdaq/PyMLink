@@ -53,6 +53,7 @@ class MLink:
         self._linkfd = -1
         self._ip = ip
         self._connectionless = connectionless
+        self._ao_scan_ch = 0
 
         if not connectionless:
             self.connect(ip)
@@ -463,27 +464,116 @@ class MLink:
         self._raise_exception(res)
 
     # TODO: doc & generate new PyMlink (missing ao_scan* functions)
-    # def ao_scan_init(self, channels, trigger, frequency, duration, range=AIRange.AI_10V):
-    #     '''
-    #     Description:
-    #         Init AO scan
-    #     Usage:
-    #         ao_scan_init(channels, trigger, frequency, duration, range=AIRange.AI_10V)
-    #         channels - analog output channels to write
-    #         range - analog output range
-    #             Avaliable output ranges:
-    #               0: 0-5V
-    #               1: 0-10V
-    #               2: 5V
-    #               3: 10V
-    #               4: 2.5V
-    #         trigger - DIO number (DIO1-8), high state triggers scanning
-    #         frequency - analog input scan frequency [Hz]
-    #         duration - analog output scan duration in seconds
-    #     '''
-    #
-    #     channels_idx = c_int8 * len(channels)
-    #     channels_idx = channels_idx(*channels)
-    #
-    #     res = cml.mlink_ao
+    @_connect_decorate
+    def ao_scan_init(self, channels, continuous, trigger, frequency, duration, ao_range=0):
+        '''
+        Description:
+            Initiates AO scan
+        Usage:
+            ao_scan_init(channels, continuous, trigger, frequency, duration, range=AIRange.AI_10V)
+            channels - analog output channels to write
+            ao_range - analog output range
+                Avaliable output ranges:
+                  0: 0-5V
+                  1: 0-10V
+                  2: 5V
+                  3: 10V
+                  4: 2.5V
+            continuous - scaning mode (0-single, 1-continuous)
+            trigger - DIO number (DIO1-8), high state triggers scanning
+            frequency - analog input scan frequency [Hz]
+            duration - analog output scan duration in seconds
+        '''
 
+        if not isinstance(channels, list):
+            channels = [channels]
+
+        ch_len = len(channels)
+        self._ao_scan_ch = ch_len
+
+        channels_idx = c_uint8 * ch_len
+        channels_idx = channels_idx(*channels)
+
+        # TODO: Make possible to set up range for each channel separately
+        range_array = [int]*ch_len
+        for i in range(ch_len):
+            range_array[i] = ao_range
+
+        range_idx = c_uint8 * ch_len
+        range_idx = range_idx(*range_array)
+
+        res = cml.mlink_ao_scan_init(pointer(self._linkfd), byref(channels_idx), ch_len, byref(range_idx),
+                                     continuous, trigger, frequency, duration)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_data_update(self, channel, data):
+        '''
+        Description:
+            Updates AO channel data in scanning single mode.
+        Usage:
+            ao_data_update(channel, data)
+            channel - AO scan channel
+            data - AO scan data
+        '''
+
+        if not isinstance(data, list):
+            data = [data]
+
+        ao_data = c_float * len(data)
+        ao_data = ao_data(*data)
+
+        res = cml.mlink_ao_data_update(pointer(self._linkfd), channel, byref(ao_data), len(data))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_data_queue(self, data, blocking):
+        '''
+        Description:
+            Updates AO channel data in scanning continuous mode.
+        Usage:
+            mdaq_ao_data_queue(data, blocking)
+            channel - AO scan channel
+            data - AO scan data
+            blocking - blocking mode (1-enable, 0-disable)
+        '''
+
+        if len(data) != self._ao_scan_ch:
+            raise MLinkError('Wrong AO scan data size.')
+
+        data_size = 0
+        for ch_data in data:
+            data_size = data_size + len(ch_data)
+
+        #make a flat list
+        data = sum(data, [])
+
+        ao_data = c_float * len(data)
+        ao_data = ao_data(*data)
+
+        res = cml.mlink_ao_data_queue(pointer(self._linkfd), byref(ao_data), data_size, blocking)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan(self):
+        '''
+        Description:
+            Starts AO scanning.
+        Usage:
+            ao_scan()
+        '''
+
+        res = cml.mlink_ao_scan(pointer(self._linkfd))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan_stop(self):
+        '''
+        Description:
+            Stops AO scanning.
+        Usage:
+            ao_scan_stop()
+        '''
+
+        res = cml.mlink_ao_scan_stop(pointer(self._linkfd))
+        self._raise_exception(res)

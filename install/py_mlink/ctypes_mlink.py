@@ -1009,6 +1009,47 @@ for _lib in _libs.itervalues():
     mlink_mem_get.restype = c_int
     break
 
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_scan_init'):
+        continue
+    mlink_ao_scan_init = _lib.mlink_ao_scan_init
+    mlink_ao_scan_init.argtypes = [POINTER(c_int), POINTER(c_uint8), c_uint8, POINTER(c_uint8), c_uint8, c_uint8, c_float,
+                                   c_float]
+    mlink_ao_scan_init.restype = c_int
+    break
+
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_data_update'):
+        continue
+    mlink_ao_data_update = _lib.mlink_ao_data_update
+    mlink_ao_data_update.argtypes = [POINTER(c_int), c_uint8, POINTER(c_float), c_int]
+    mlink_ao_data_update.restype = c_int
+    break
+
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_data_queue'):
+        continue
+    mlink_ao_data_queue = _lib.mlink_ao_data_queue
+    mlink_ao_data_queue.argtypes = [POINTER(c_int), POINTER(c_float), c_int, c_uint8]
+    mlink_ao_data_queue.restype = c_int
+    break
+
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_scan'):
+        continue
+    mlink_ao_scan = _lib.mlink_ao_scan
+    mlink_ao_scan.argtypes = [POINTER(c_int)]
+    mlink_ao_scan.restype = c_int
+    break
+
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_scan_stop'):
+        continue
+    mlink_ao_scan_stop = _lib.mlink_ao_scan_stop
+    mlink_ao_scan_stop.argtypes = [POINTER(c_int)]
+    mlink_ao_scan_stop.restype = c_int
+    break
+
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 15
 try:
     AO_0_TO_5V = 0
