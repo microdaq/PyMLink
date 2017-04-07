@@ -538,15 +538,21 @@ class MLink:
             blocking - blocking mode (1-enable, 0-disable)
         '''
 
-        if len(data) != self._ao_scan_ch:
+        if not isinstance(data, list):
+            data = [data]
+
+        if isinstance(data[0], list):
+            if len(data) != self._ao_scan_ch:
+                raise MLinkError('Wrong AO scan data size.')
+            data_size = 0
+            for ch_data in data:
+                data_size = data_size + len(ch_data)
+            #make a flat list
+            data = sum(data, [])
+        elif self._ao_scan_ch == 1:
+            data_size = len(data)
+        else:
             raise MLinkError('Wrong AO scan data size.')
-
-        data_size = 0
-        for ch_data in data:
-            data_size = data_size + len(ch_data)
-
-        #make a flat list
-        data = sum(data, [])
 
         ao_data = c_float * len(data)
         ao_data = ao_data(*data)
