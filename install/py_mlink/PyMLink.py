@@ -189,7 +189,7 @@ class MLink:
                 2 - ENC2: DIO3 - Channel A, DIO4 - Channel B (enabled by default)
                 3 - PWM1: DIO10 - Channel A, DIO11 - Channel B (enabled by default)
                 4 - PWM2: DIO12 - Channel A, DIO13 - Channel B (enabled by default)
-                5 - PWM3: DIO14 - Channel A, DIO14 - Channel B (enabled by default)
+                5 - PWM3: DIO14 - Channel A, DIO15 - Channel B (enabled by default)
                 6 - UART: DIO8 - Rx, DIO9 - Tx (enabled by default)
             state - function state (True/False to enable/disable function)
         '''
