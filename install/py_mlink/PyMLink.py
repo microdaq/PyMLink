@@ -1,7 +1,6 @@
-# MLink Python2.7 binding.
+# MLink Python2.7 binding
 # visit site www.microdaq.org
-# author Witczenko
-# email witczenko@gmail.com
+# Embedded-solutions, November 2017
 
 import ctypes_mlink as cml
 from ctypes import *
@@ -47,19 +46,20 @@ class MLink:
     Description:
         Main class of MLink Python2.7 binding.
     Usage:
-        MLink(ip, connectionless=True)
+        MLink(ip, maintain_connection=False)
         ip - ip address of MicroDAQ device
-        connectionless - True or False
+        maintain_connection - True or False
             True  - more convenient, no needs to keep connection (each function call connect()
                     method), slightly less performance
-            False - better performance, user has to worry about connection timeout (10 sec)
+            False - better performance, user has to worry about connection timeout (depends on OS)
                     To keep connection call method reconnect() or any other method.
     '''
+
     # ------------ SPECIAL FUNCTIONS ------------
-    def __init__(self, ip='10.10.1.1', connectionless=True):
+    def __init__(self, ip='10.10.1.1', maintain_connection=False):
         self._linkfd = -1
         self._ip = ip
-        self._connectionless = connectionless
+        self._connectionless = maintain_connection
         self._ao_scan_ch = 0
         self._mdaq_hwid = 0
         self.disconnect()
@@ -68,7 +68,7 @@ class MLink:
         self._hwid()
         self.disconnect()
 
-        if not connectionless:
+        if not self._connectionless:
             self.connect(ip)
 
     def _get_error(self, errcode):
@@ -111,8 +111,7 @@ class MLink:
         Usage:
             disconnect()
         '''
-        # print 'Disconnect'
-        #cml.mlink_disconnect(self._linkfd)
+
         cml.mlink_disconnect_all()
 
     def connect(self, ip):
@@ -151,6 +150,18 @@ class MLink:
             get_version()
          '''
         return cml.mlink_version(pointer(self._linkfd))
+
+    def hw_info(self):
+        '''
+        Description:
+            Prints model of connected MicroDAQ device  
+        Usage:
+            hw_info()
+         '''
+
+        print '----------------------------------'
+        print '\tMicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
+        print '----------------------------------'
 
     # ------------ DSP FUNCTIONS ------------
     @_connect_decorate
