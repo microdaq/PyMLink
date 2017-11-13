@@ -159,9 +159,7 @@ class MLink:
             hw_info()
          '''
 
-        print '-----------------------------------'
-        print '\tMicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
-        print '-----------------------------------'
+        print 'MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
 
     # ------------ DSP FUNCTIONS ------------
     @_connect_decorate

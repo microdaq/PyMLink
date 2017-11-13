@@ -52,20 +52,20 @@ try:
     with open(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), 'wb') as output:
         output.write(bin.read())
     print '...done.'
-
-    # if linux then copy lib to standard location
-    if os_name == 'Linux':
-        pack_data = {}
-        linux_lib_path = '/usr/lib/'
-        try:
-            print 'Moving file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
-            shutil.move(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+mlink_lib))
-        except:
-            print '...failed.'
-            sys.exit()
 except:
     print 'Cannot download MLink library. Check your internet connection and try again.'
     sys.exit()
+
+# if linux then copy lib to standard location
+if os_name == 'Linux':
+    pack_data = {}
+    linux_lib_path = '/usr/lib/'
+    try:
+        print 'Moving file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
+        shutil.move(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+mlink_lib))
+    except:
+        print '...failed.'
+        sys.exit()
 
 tmp_dir = ''
 setup(name='PyMLink',
