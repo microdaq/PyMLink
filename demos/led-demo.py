@@ -1,28 +1,24 @@
 # LED demo
 # visit site www.microdaq.org
-# author Witczenko
-# email witczenko@gmail.com
+# Embedded-solutions, November 2017
 
 from py_mlink import PyMLink
 import time
 
-try:
-    # Create MLink object, connect to MicroDAQ device
-    pml = PyMLink.MLink('10.10.1.1')
+# Create MLink object, connect to MicroDAQ device
+mdaq = PyMLink.MLink('10.10.1.1')
 
-    # turn on LED 1
-    pml.led_write(1, True)
-    # turn on LED 2
-    pml.led_write(2, True)
+# turn on LED 1
+mdaq.led_write(1, True)
+# turn on LED 2
+mdaq.led_write(2, True)
 
-    # wait a second
-    time.sleep(1.0)
+# wait a second
+time.sleep(1.0)
 
-    # turn off LED 1
-    pml.led_write(1, False)
-    # turn off LED 2
-    pml.led_write(2, False)
+# turn off LED 1
+mdaq.led_write(1, False)
+# turn off LED 2
+mdaq.led_write(2, False)
 
-except PyMLink.MLinkError, errval:
-    print "Error:", errval
 
