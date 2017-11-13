@@ -1,7 +1,6 @@
-# MLink Python2.7 binding.
+# MLink Python2.7 binding
 # visit site www.microdaq.org
-# author Witczenko
-# email witczenko@gmail.com
+# Embedded-solutions, November 2017
 
 import ctypes_mlink as cml
 from ctypes import *
@@ -17,22 +16,29 @@ class MLinkError(Exception):
 
 
 class AIRange(object):
-    AI_10V = 0
-    AI_5V = 1
-    AI_2V5 = 2
-    AI_1V25 = 3
-    AI_0V64 = 4
-    AI_0V32 = 5
+    AI_10V = [-10, 10]
+    AI_10V_UNI = [0, 10]
+
+    AI_5V = [-5, 5]
+    AI_5_12V = [-5.12, 5.12]
+
+    AI_2V = [-2, 2]
+    AI_2_56V = [-2.56, 2.56]
+
+    AI_1V = [-1, 1]
+    AI_1_24V = [-1.24, 1.24]
+
+    AI_0_64V = [-0.64, 0.64]
 
 
-class AIPolarity(object):
-    AI_BIPOLAR = 24
-    AI_UNIPOLAR = 25
+class AORange(object):
+    AO_10V = [-10, 10]
+    AO_10V_UNI = [0, 10]
 
+    AO_5V = [-5, 5]
+    AO_5V_UNI = [0, 5]
 
-class AIMode(object):
-    AI_SINGLE = 28
-    AI_DIFF = 29
+    AO_2_5V = [-2.5, 2.5]
 
 
 class MLink:
@@ -40,22 +46,29 @@ class MLink:
     Description:
         Main class of MLink Python2.7 binding.
     Usage:
-        MLink(ip, connectionless=True)
+        MLink(ip, maintain_connection=False)
         ip - ip address of MicroDAQ device
-        connectionless - True or False
+        maintain_connection - True or False
             True  - more convenient, no needs to keep connection (each function call connect()
                     method), slightly less performance
-            False - better performance, user has to worry about connection timeout (10 sec)
+            False - better performance, user has to worry about connection timeout (depends on OS)
                     To keep connection call method reconnect() or any other method.
     '''
+
     # ------------ SPECIAL FUNCTIONS ------------
-    def __init__(self, ip='10.10.1.1', connectionless=True):
+    def __init__(self, ip='10.10.1.1', maintain_connection=False):
         self._linkfd = -1
         self._ip = ip
-        self._connectionless = connectionless
+        self._connectionless = maintain_connection
         self._ao_scan_ch = 0
+        self._mdaq_hwid = 0
+        self.disconnect()
 
-        if not connectionless:
+        self.connect(ip)
+        self._hwid()
+        self.disconnect()
+
+        if not self._connectionless:
             self.connect(ip)
 
     def _get_error(self, errcode):
@@ -81,6 +94,16 @@ class MLink:
         return func_wrapper
 
     # ------------ UTILITY FUNCTIONS ------------
+    @_connect_decorate
+    def _hwid(self):
+        hwid_raw = c_int * 5
+        hwid_raw = hwid_raw(0)
+
+        res = cml.mlink_hwid(pointer(self._linkfd), byref(hwid_raw))
+
+        self._mdaq_hwid = hwid_raw
+        self._raise_exception(res)
+
     def disconnect(self):
         '''
         Description:
@@ -88,8 +111,8 @@ class MLink:
         Usage:
             disconnect()
         '''
-        # print 'Disconnect'
-        cml.mlink_disconnect(self._linkfd)
+
+        cml.mlink_disconnect_all()
 
     def connect(self, ip):
         '''
@@ -115,6 +138,7 @@ class MLink:
             reconnect()
         '''
         if self._ip is not None:
+            self.disconnect()
             self.connect(self._ip)
 
     @_connect_decorate
@@ -126,6 +150,16 @@ class MLink:
             get_version()
          '''
         return cml.mlink_version(pointer(self._linkfd))
+
+    def hw_info(self):
+        '''
+        Description:
+            Prints model of connected MicroDAQ device  
+        Usage:
+            hw_info()
+         '''
+
+        print 'MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
 
     # ------------ DSP FUNCTIONS ------------
     @_connect_decorate
@@ -206,6 +240,7 @@ class MLink:
             bank - bank number (1-4)
             direction - bank direction (True - output, False - input)
         '''
+
         res = cml.mlink_dio_set_dir(pointer(self._linkfd), bank, direction, 0)
         self._raise_exception(res)
 
@@ -225,7 +260,7 @@ class MLink:
         value = c_uint8()
         data = []
         for d in dio:
-            res = cml.mlink_dio_get(pointer(self._linkfd), d, pointer(value))
+            res = cml.mlink_dio_read(pointer(self._linkfd), d, pointer(value))
             self._raise_exception(res)
             data += [value.value]
 
@@ -255,7 +290,7 @@ class MLink:
 
         i = 0
         for d in dio:
-            res = cml.mlink_dio_set(pointer(self._linkfd), d, state[i])
+            res = cml.mlink_dio_write(pointer(self._linkfd), d, state[i])
             i += 1
             self._raise_exception(res)
 
@@ -269,7 +304,7 @@ class MLink:
             key - key number (1 or 2)
         '''
         value = c_uint8()
-        res = cml.mlink_func_key_get(pointer(self._linkfd), key, pointer(value))
+        res = cml.mlink_func_read(pointer(self._linkfd), key, pointer(value))
         self._raise_exception(res)
         return value.value
 
@@ -283,7 +318,7 @@ class MLink:
             led - LED number (1 or 2)
             state - LED state (True - ON, False - OFF)
         """
-        res = cml.mlink_led_set(pointer(self._linkfd), ledid, state)
+        res = cml.mlink_led_write(pointer(self._linkfd), ledid, state)
         self._raise_exception(res)
 
     # ------------ ENCODER READ FUNCTIONS ------------
@@ -297,7 +332,7 @@ class MLink:
             encoder - encoder module (1 or 2)
             init_value - initial encoder value
         """
-        res = cml.mlink_enc_reset(pointer(self._linkfd), encoder, init_value)
+        res = cml.mlink_enc_init(pointer(self._linkfd), encoder, init_value)
         self._raise_exception(res)
 
     @_connect_decorate
@@ -310,24 +345,26 @@ class MLink:
             encoder - encoder module (1 or 2)
         """
         encdir = c_uint8()
-        position = c_uint32()
-        res = cml.mlink_enc_get(pointer(self._linkfd), encoder, pointer(encdir), pointer(position))
+        position = c_int32()
+        res = cml.mlink_enc_read(pointer(self._linkfd), encoder, pointer(encdir), pointer(position))
         self._raise_exception(res)
         return position.value, encdir.value
 
     # ------------ PWM FUNCTIONS ------------
     @_connect_decorate
-    def pwm_init(self, module, period, active_low):
+    def pwm_init(self, pwm_module, period, active_low=False, duty_a=0, duty_b=0):
         """
         Description:
             Setup MicroDAQ PWM outputs
         Usage:
-            pwm_init(module, period, active_low)
-            module - PWM module (1, 2 or 3)
+            pwm_init(module, period, active_low=False, duty_a=0, duty_b=0)
+            pwm_module - PWM module (1, 2 or 3)
             period - PWM module period in microseconds(1-1000000)
             active_low - PWM waveform polarity (True or False)
+            duty_a - PWM channel A duty (0-100)
+            duty_b - PWM channel B duty (0-100)
         """
-        res = cml.mlink_pwm_config(pointer(self._linkfd), module, period, active_low, 0, 0)
+        res = cml.mlink_pwm_init(pointer(self._linkfd), pwm_module, period, active_low, duty_a, duty_b)
         self._raise_exception(res)
 
     @_connect_decorate
@@ -341,39 +378,68 @@ class MLink:
             duty_a - PWM channel A duty (0-100)
             duty_b - PWM channel B duty (0-100)
         """
-        res = cml.mlink_pwm_set(pointer(self._linkfd), module, duty_a, duty_b)
+        res = cml.mlink_pwm_write(pointer(self._linkfd), module, duty_a, duty_b)
         self._raise_exception(res)
 
     # ------------ ANALOG IO FUNCTIONS ------------
     @_connect_decorate
-    def ai_read(self, channels, range=AIRange.AI_10V, polarity=AIPolarity.AI_BIPOLAR, mode=AIMode.AI_SINGLE):
+    def ai_read(self, channels, ai_range=AIRange.AI_10V, is_differential=False):
         """
         Description:
             Reads MicroDAQ analog inputs
         Usage:
-            ai_read(channels, range=AIRange.AI_10V, polarity=AIPolarity.AI_BIPOLAR, mode=AIMode.AI_SINGLE)
+            ai_read(channels, range=AIRange.AI_10V, is_differential=False)
             channels - analog input channels to read
-            range - analog input range:
-                                        AIRange.AI_10V
-                                        AIRange.AI_5V
-                                        AIRange.AI_2V5
-                                        AIRange.AI_1V25
-                                        AIRange.AI_0V64
-                                        AIRange.AI_0V32
-            polarity - analog input polarity (AIPolarity.AI_BIPOLAR or AIPolarity.AI_UNIPOLAR)
-            mode - measurement type (AIMode.AI_SINGLE or AIMode.AI_DIFF)
+            ai_range - analog input range:
+                AI_10V     - [-10, 10]
+                AI_10V_UNI - [0, 10]
+                AI_5V      - [-5, 5]
+                AI_5_12V   - [-5.12, 5.12]
+                AI_2V      - [-2, 2]
+                AI_2_56V   - [-2.56, 2.56]  
+                AI_1V      - [-1, 1]
+                AI_1_24V   - [-1.24, 1.24]
+                AI_0_64V   - [-0.64, 0.64]
+                AIRange.AI_10V  -    single-range argument applied for all used channels
+                AIRange.AI_10V  + AIRange.AI_5V  - multi-range argument for two channels
+
+            is_differential - scalar or array with measurement mode settings: 
+                              True  - differential 
+                              False - single-ended mode
         """
 
         if not isinstance(channels, list):
             channels = [channels]
 
+        if not isinstance(is_differential, list):
+            is_differential = [is_differential]
+
+        if len(is_differential) == 1 and len(channels) != 1:
+            is_differential_cpy = is_differential
+            for i in range(len(channels) - 1):
+                is_differential = is_differential + is_differential_cpy
+        elif len(channels) != len(is_differential):
+            raise MLinkError('ai_scan_init: Mode (is_differential parameter) vector should match selected AI channels')
+
+        if len(ai_range) == 2 and len(channels) != 1:
+            range_cpy = ai_range
+            for i in range(len(channels)-1):
+                ai_range = ai_range + range_cpy
+        elif len(channels) != len(ai_range) / 2:
+            raise MLinkError('ai_scan_init: Range vector should match selected AI channels!')
+
         channels_idx = c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
-        channels_val = c_float * len(channels)
+        channels_val = c_double * (len(channels))
         channels_val = channels_val()
+        channels_range = c_double * (len(ai_range))
+        channels_range = channels_range(*ai_range)
 
-        res = cml.mlink_ai_read(pointer(self._linkfd), 1, byref(channels_idx), len(channels), range, polarity, mode,
-                                byref(channels_val))
+        diff = c_int8 * len(is_differential)
+        diff = diff(*is_differential)
+
+        res = cml.mlink_ai_read(pointer(self._linkfd), byref(channels_idx), len(channels), byref(channels_range),
+                                byref(diff), byref(channels_val))
         self._raise_exception(res)
 
         val_list = [channels_val[i] for i in xrange(len(channels))]
@@ -382,36 +448,68 @@ class MLink:
         else:
             return val_list
 
+
     @_connect_decorate
-    def ai_scan_init(self, channels, frequency, duration, range=AIRange.AI_10V, polarity=AIPolarity.AI_BIPOLAR,
-                     mode=AIMode.AI_SINGLE):
+    def ai_scan_init(self, channels, ai_range, is_differential, rate, duration):
         """
         Description:
             Init AI scan
         Usage:
-            ai_scan_init(channels, frequency, time, range=AIRange.AI_10V, polarity=AIPolarity.AI_BIPOLAR,
-                        mode=AIMode.AI_SINGLE)
+            ai_scan_init(channels, ai_range, is_differential, rate, duration)
             channels - analog input channels to read
-            frequency - analog input scan frequency [Hz]
+            ai_range - analog input range:
+                AI_10V     - [-10, 10]
+                AI_10V_UNI - [0, 10]
+                AI_5V      - [-5, 5]
+                AI_5_12V   - [-5.12, 5.12]
+                AI_2V      - [-2, 2]
+                AI_2_56V   - [-2.56, 2.56]
+                AI_1V      - [-1, 1]
+                AI_1_24V   - [-1.24, 1.24]
+                AI_0_64V   - [-0.64, 0.64]
+                AIRange.AI_10V  -    single-range argument applied for all used channels
+                AIRange.AI_10V  + AIRange.AI_5V  - multi-range argument for two channels
+
+            is_differential - scalar or array with measurement mode settings:
+                              True  - differential
+                              False - single-ended mode
+            rate - analog input scan frequency [Hz]
             duration - analog input scan duration in seconds
-            range - analog input range:
-                                        AIRange.AI_10V
-                                        AIRange.AI_5V
-                                        AIRange.AI_2V5
-                                        AIRange.AI_1V25
-                                        AIRange.AI_0V64
-                                        AIRange.AI_0V32
-            polarity - analog input polarity (%T - bipolar, %F - unipolar)
-            mode - measurement type (AIMode.AI_SINGLE or AIMode.AI_DIFF)
         """
         if not isinstance(channels, list):
             channels = [channels]
+        if not isinstance(is_differential, list):
+            is_differential = [is_differential]
+
+        if len(is_differential) == 1 and len(channels) != 1:
+            is_differential_cpy = is_differential
+            for i in range(len(channels) - 1):
+                is_differential = is_differential + is_differential_cpy
+        elif len(channels) != len(is_differential):
+            raise MLinkError('ai_scan_init: Mode (is_differential parameter) vector should match selected AI channels')
+
+        if len(ai_range) == 2 and len(channels) != 1:
+            range_cpy = ai_range
+            for i in range(len(channels)-1):
+                ai_range = ai_range + range_cpy
+        elif len(channels) != len(ai_range) / 2:
+            raise MLinkError('ai_scan_init: Range vector should match selected AI channels!')
+
+        if duration < 0:
+            duration = -1
 
         self._ai_scan_channels = channels
         channels_idx = c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
-        res = cml.mlink_ai_scan_init(pointer(self._linkfd), byref(channels_idx), len(channels), range, polarity, mode,
-                                     frequency, duration)
+        channels_range = c_double * (len(ai_range))
+        channels_range = channels_range(*ai_range)
+        diff = c_int8 * len(is_differential)
+        diff = diff(*is_differential)
+        rate = c_float(rate)
+
+        res = cml.mlink_ai_scan_init(pointer(self._linkfd), byref(channels_idx), len(channels), channels_range,
+                                     byref(diff), pointer(rate), duration)
+        print res
         self._raise_exception(res)
 
     @_connect_decorate
@@ -437,13 +535,22 @@ class MLink:
         return val_list
 
     @_connect_decorate
-    def ao_write(self, channels, data):
+    def ao_write(self, channels, ao_range, data):
         '''
         Description:
             Writes data to MicroDAQ analog outputs
         Usage:
-            ao_write(channels, data)
+            ao_write(channels, range, data)
             channels - analog output channels
+            ao_range - analog output range matrix e.g.
+                AO_10V      - [-10, 10]
+                AO_10V_UNI  - [0, 10]
+                AO_5V       - [-5, 5]
+                AO_5V_UNI   - [0, 5]
+                AO_2_5V     - [-2.5, 2.5]                
+                AORange.AO_5V_UNI - single-range argument applied for all used channels
+                AORange.AO_5V + AORange.AO_10V  - multi-range argument for two channels
+                
             data - data to be written
         '''
 
@@ -451,114 +558,146 @@ class MLink:
             channels = [channels]
         if not isinstance(data, list):
             data = [data]
+        if not isinstance(ao_range, list):
+            ao_range = [ao_range]
 
         if len(channels) != len(data):
-            raise MLinkError('ao_write: Number of channels and data is not equal!')
+            raise MLinkError('ao_read: Data vector should match selected AI channels!')
+
+        if len(ao_range) == 2 and len(channels) != 1:
+            range_cpy = ao_range
+            for i in range(len(channels)-1):
+                ao_range = ao_range + range_cpy
+        elif len(channels) != len(ao_range)/2:
+            raise MLinkError('ao_read: Range vector should match selected AI channels!')
 
         channels_idx = c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
-        channels_val = c_float * len(channels)
+        channels_val = c_double * len(channels)
         channels_val = channels_val(*data)
+        channels_range = c_double * (len(ao_range))
+        channels_range = channels_range(*ao_range)
 
-        res = cml.mlink_ao_write(pointer(self._linkfd), 1, byref(channels_idx), len(channels), 1, byref(channels_val))
+        res = cml.mlink_ao_write(pointer(self._linkfd), byref(channels_idx), len(channels), byref(channels_range), 1,
+                                 byref(channels_val))
         self._raise_exception(res)
 
-    # TODO: doc & generate new PyMlink (missing ao_scan* functions)
+
     @_connect_decorate
-    def ao_scan_init(self, channels, continuous, trigger, frequency, duration, ao_range=0):
+    def ao_scan_init(self, channels, initial_data, ao_range, is_stream_mode, rate, duration):
         '''
         Description:
             Initiates AO scan
         Usage:
-            ao_scan_init(channels, continuous, trigger, frequency, duration, range=AIRange.AI_10V)
+            ao_scan_init(channels, initial_data, ao_range, is_stream_mode, rate, duration)
             channels - analog output channels to write
-            ao_range - analog output range
-                Avaliable output ranges:
-                  0: 0-5V
-                  1: 0-10V
-                  2: 5V
-                  3: 10V
-                  4: 2.5V
-            continuous - scaning mode (0-single, 1-continuous)
-            trigger - DIO number (DIO1-8), high state triggers scanning
-            frequency - analog input scan frequency [Hz]
+            initial_data - output data
+            ao_range - analog output range matrix e.g.
+                AO_10V      - [-10, 10]
+                AO_10V_UNI  - [0, 10]
+                AO_5V       - [-5, 5]
+                AO_5V_UNI   - [0, 5]
+                AO_2_5V     - [-2.5, 2.5]    
+                AORange.AO_5V_UNI - single-range argument applied for all used channels
+                AORange.AO_5V + AORange.AO_10V  - multi-range argument for two channels
+                
+            is_stream_mode - mode of operation (True - stream, False - periodic)
+            rate - scans per second rate (scan frequency) [Hz]
             duration - analog output scan duration in seconds
         '''
 
         if not isinstance(channels, list):
             channels = [channels]
 
+        if not isinstance(initial_data, list):
+            initial_data = [initial_data]
+
         ch_len = len(channels)
         self._ao_scan_ch = ch_len
 
+        if len(ao_range) == 2 and len(channels) != 1:
+            range_cpy = ao_range
+            for i in range(len(channels)-1):
+                ao_range = ao_range + range_cpy
+        elif len(channels) != len(ao_range)/2:
+            raise MLinkError('ao_read: Range vector should match selected AI channels!')
+
+        data_size = 0
+        if isinstance(initial_data[0], list):
+            data_size_ch = len(initial_data[0])
+            if all(len(x) == data_size_ch for x in initial_data):
+                pass
+            else:
+                raise MLinkError('Wrong AO scan data size.')
+
+            for ch_data in initial_data:
+                data_size = data_size + len(ch_data)
+            # make a flat list
+            initial_data = sum(initial_data, [])
+        else:
+            if len(channels) > 1:
+                raise MLinkError('Wrong AO scan data size.')
+            data_size = len(initial_data)
+
+        ao_data = c_float * data_size
+        ao_data = ao_data(*initial_data)
+        channels_idx = c_uint8 * ch_len
+        channels_idx = channels_idx(*channels)
+        channels_range = c_double * (len(ao_range))
+        channels_range = channels_range(*ao_range)
+
+        res = cml.mlink_ao_scan_init(pointer(self._linkfd), byref(channels_idx), len(channels), byref(ao_data),
+                                     c_int(data_size), byref(channels_range), c_uint8(is_stream_mode), c_float(rate),
+                                     c_float(duration))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan_data(self, channels, data, opt=True):
+        '''
+        Description:
+           Queues data to be output
+        Usage:
+            ao_data_queue(channels, data, opt=True)
+            channels - analog output channels to write
+            data - data to be output
+            opt - reset buffer index to 0 (True/False) - periodic mode
+                  blocking/non-blocking   (True/False) - stream mode 
+        '''
+
+        if not isinstance(data, list):
+            data = [data]
+
+        if not isinstance(channels, list):
+            channels = [channels]
+
+        data_size = 0
+        if isinstance(data[0], list):
+            data_size_ch = len(data[0])
+            if all(len(x) == data_size_ch for x in data):
+                pass
+            else:
+                raise MLinkError('Wrong AO scan data size.')
+
+            for ch_data in data:
+                data_size = data_size + len(ch_data)
+            # make a flat list
+            data = sum(data, [])
+        else:
+            if len(channels) > 1:
+                raise MLinkError('Wrong AO scan data size.')
+            data_size = len(data)
+
+        ch_len = len(channels)
+
+        ao_data = c_float * data_size
+        ao_data = ao_data(*data)
         channels_idx = c_uint8 * ch_len
         channels_idx = channels_idx(*channels)
 
-        # TODO: Make possible to set up range for each channel separately
-        range_array = [int]*ch_len
-        for i in range(ch_len):
-            range_array[i] = ao_range
-
-        range_idx = c_uint8 * ch_len
-        range_idx = range_idx(*range_array)
-
-        res = cml.mlink_ao_scan_init(pointer(self._linkfd), byref(channels_idx), ch_len, byref(range_idx),
-                                     continuous, trigger, frequency, duration)
+        res = cml.mlink_ao_scan_data(pointer(self._linkfd), byref(channels_idx), c_int(ch_len), byref(ao_data),
+                                     c_int(data_size), c_uint8(opt))
         self._raise_exception(res)
 
-    @_connect_decorate
-    def ao_data_update(self, channel, data):
-        '''
-        Description:
-            Updates AO channel data in scanning single mode.
-        Usage:
-            ao_data_update(channel, data)
-            channel - AO scan channel
-            data - AO scan data
-        '''
-
-        if not isinstance(data, list):
-            data = [data]
-
-        ao_data = c_float * len(data)
-        ao_data = ao_data(*data)
-
-        res = cml.mlink_ao_data_update(pointer(self._linkfd), channel, byref(ao_data), len(data))
-        self._raise_exception(res)
-
-    @_connect_decorate
-    def ao_data_queue(self, data, blocking):
-        '''
-        Description:
-            Updates AO channel data in scanning continuous mode.
-        Usage:
-            mdaq_ao_data_queue(data, blocking)
-            channel - AO scan channel
-            data - AO scan data
-            blocking - blocking mode (1-enable, 0-disable)
-        '''
-
-        if not isinstance(data, list):
-            data = [data]
-
-        if isinstance(data[0], list):
-            if len(data) != self._ao_scan_ch:
-                raise MLinkError('Wrong AO scan data size.')
-            data_size = 0
-            for ch_data in data:
-                data_size = data_size + len(ch_data)
-            #make a flat list
-            data = sum(data, [])
-        elif self._ao_scan_ch == 1:
-            data_size = len(data)
-        else:
-            raise MLinkError('Wrong AO scan data size.')
-
-        ao_data = c_float * len(data)
-        ao_data = ao_data(*data)
-
-        res = cml.mlink_ao_data_queue(pointer(self._linkfd), byref(ao_data), data_size, blocking)
-        self._raise_exception(res)
 
     @_connect_decorate
     def ao_scan(self):
@@ -582,4 +721,16 @@ class MLink:
         '''
 
         res = cml.mlink_ao_scan_stop(pointer(self._linkfd))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ai_scan_stop(self):
+        '''
+        Description:
+            Stops AI scanning.
+        Usage:
+            ai_scan_stop()
+        '''
+
+        res = cml.mlink_ai_scan_stop(pointer(self._linkfd))
         self._raise_exception(res)

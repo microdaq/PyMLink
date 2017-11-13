@@ -1,40 +1,29 @@
 # Digital I/O demo
 # visit site www.microdaq.org
-# author Witczenko
-# email witczenko@gmail.com
+# Embedded-solutions, November 2017
 
 from py_mlink import PyMLink
 
-try:
-    # Create MLink object, connect to MicroDAQ device
-    pml = PyMLink.MLink('10.10.1.1')
+# Create MLink object, connect to MicroDAQ device
+mdaq = PyMLink.MLink('10.10.1.2')
 
-    # Configure Digital I/O
-    # Disable all functions: encoder, pwm, uart
-    for i in range(1, 7):
-        pml.dio_func(i, False)
+# Configure Digital I/O, disable all functions: encoder, pwm, uart
+for i in range(1, 7):
+    mdaq.dio_func(i, False)
 
-    # Set first 8 I/O to input mode
-    pml.dio_dir(1, False)
-    # Set next 8 I/O to output mode
-    pml.dio_dir(2, True)
+# Choose channels to be digital input
+DI = [1, 2, 3, 4, 5, 6, 7, 8]
 
-    # Choose channels to read eg. 1..8
-    channels_in = [ch for ch in range(1, 9)]
-    # Choose channels to write eg. 9..16
-    channels_out = [ch for ch in range(9, 17)]
-    channels_out_data = [True for state in range(8)]
+# Choose channels to be digital output
+DO = [9, 10, 11, 12, 13, 14, 15, 16]
+DO_state = [True for state in range(8)]
 
-    # Read data
-    data_in = pml.dio_read(channels_in)
-    # Set data
-    pml.dio_write(channels_out, channels_out_data)
+# Read DI states
+di_state = mdaq.dio_read(DI)
+# Set DO states
+mdaq.dio_write(DO, DO_state)
 
-    # Print data
-    i = 0
-    for ch in channels_in:
-        print 'DI[%d]: %d' % (ch, data_in[i])
-        i += 1
+# Print data
+for i, di in enumerate(di_state):
+    print 'DI[%d]: %d' % (i, di)
 
-except PyMLink.MLinkError, errval:
-    print "Error:", errval

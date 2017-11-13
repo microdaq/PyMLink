@@ -1,7 +1,6 @@
 # PyMLink installation script
 # visit site www.microdaq.org
-# author Witczenko
-# email witczenko@gmail.com
+# Embedded-solutions, November 2017
 
 from distutils.core import setup
 import platform
@@ -43,10 +42,8 @@ else:
 mlink_lib = lib_ver+lib_ext
 pack_data = {PYMLINK_VERSION: [mlink_lib]}
 
-
-# TODO: Dont forget to change url after tests!
 try:
-    url = "https://github.com/microdaq/MLink/raw/upgrade_test/bin/"+os_name+"/"+mlink_lib
+    url = "https://github.com/microdaq/MLink/raw/master/"+mlink_lib
 
     print 'Downloading MLink library from ' + url
     bin = urllib2.urlopen(url)
@@ -55,28 +52,26 @@ try:
     with open(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), 'wb') as output:
         output.write(bin.read())
     print '...done.'
-
-    #if linux then copy lib to standard location
-    if os_name == 'Linux':
-        pack_data = {}
-        linux_lib_path = '/usr/lib/'
-        try:
-            print 'Moving file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
-            shutil.move(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+mlink_lib))
-        except:
-            print '...failed.'
-            sys.exit()
 except:
-    print 'Cannot download MLink library. Try run setup script again.'
+    print 'Cannot download MLink library. Check your internet connection and try again.'
     sys.exit()
 
-tmp_dir = ''
+# if linux then copy lib to standard location
+if os_name == 'Linux':
+    pack_data = {}
+    linux_lib_path = '/usr/lib/'
+    try:
+        print 'Moving file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
+        shutil.move(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+mlink_lib))
+    except:
+        print '...failed.'
+        sys.exit()
 
-# TODO: Fill metadata
+tmp_dir = ''
 setup(name='PyMLink',
-      version='1.0',
-      author='Witczenko',
-      author_email='witczenko@gmail.com',
+      version='1.1',
+      author='Lukas Wit',
+      author_email='lukas.w@embedded-solutions.pl',
       url='www.microdaq.org',
       description='Python2.7 binding of MLink library.',
       license='BSD',

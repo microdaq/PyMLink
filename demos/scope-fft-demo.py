@@ -1,7 +1,6 @@
-# Scope FFT  - demo
+# Scope FFT demo
 # visit site www.microdaq.org
-# author Witczenko
-# email witczenko@gmail.com
+# Embedded-solutions, November 2017
 
 from py_mlink import PyMLink
 import numpy.fft as npfft
@@ -17,9 +16,9 @@ except ImportError:
 QtCore.qInstallMsgHandler(lambda *args: None)
 
 # Params
-DATA_COUNT = 500
-SAMPLE_RATE_HZ = 10000
-DURATION_SEC = 60*5
+DATA_COUNT = 10000
+SAMPLE_RATE_HZ = 100000
+DURATION_SEC = 60
 CHANNEL = 1
 
 # Create plot with pyqtgraph
@@ -41,16 +40,17 @@ p_data_handle = p_data.plot(xd, np.zeros(DATA_COUNT), pen="g")
 
 
 # Create MLink object, connect to MicroDAQ device
-pml = PyMLink.MLink('10.10.1.1', connectionless=False)
+mdaq = PyMLink.MLink('10.10.1.1')
 # Init analog input scan
-pml.ai_scan_init(CHANNEL, SAMPLE_RATE_HZ, DURATION_SEC, PyMLink.AIRange.AI_5V)
+mdaq.ai_scan_init(CHANNEL, PyMLink.AIRange.AI_5V, False, SAMPLE_RATE_HZ, DURATION_SEC)
 
 print 'Acquiring data...'
 for i in range((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT):
     # Get AI data
-    data = pml.ai_scan(DATA_COUNT, True)
+    data = mdaq.ai_scan(DATA_COUNT, True)
 
     # Calc FFT and draw plots
+    data = data - np.mean(data)
     y = np.array(abs(npfft.fft(data[0])/DATA_COUNT))
     y = y[0:(DATA_COUNT/2)]*2.0
     p_fft_handle.setData(xf, y)
