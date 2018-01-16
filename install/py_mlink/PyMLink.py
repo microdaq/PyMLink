@@ -163,28 +163,63 @@ class MLink:
 
     # ------------ DSP FUNCTIONS ------------
     @_connect_decorate
-    def dsp_load(self, dsp_firmware, param=''):
+    def dsp_run(self, dsp_firmware, step_time):
         '''
         Description:
-            Loads DSP program
+            Executes DSP program
         Usage:
-            dsp_load(dsp_firmware, param='')
-            dsp_firmware - XCos generated DSP application path
-            param - optional parameters
+            dsp_run(dsp_firmware, step_time)
+            dsp_firmware - XCos generated DSP application 
+            step_time - custom model mode step or -1 to keep Xcos settings 
         '''
-        res = cml.mlink_dsp_load(pointer(self._linkfd), dsp_firmware, param)
+        res = cml.mlink_dsp_run(pointer(self._linkfd), dsp_firmware, step_time)
         self._raise_exception(res)
 
     @_connect_decorate
-    def dsp_start(self):
+    def dsp_mem_write(self, index, data):
         '''
         Description:
-            Starts DSP program
+            Writes data to MicroDAQ memory which can be accessed 
+            via MEM read block in XCOS model. 
         Usage:
-            dsp_start()
+            dsp_mem_write(index, data)
+            index - memory index  
+            data - data to be written  
         '''
-        res = cml.mlink_dsp_start(pointer(self._linkfd))
+        
+        if not isinstance(data, list):
+            data = [data]
+
+        data_c = c_float * len(data)
+        data_c = data_c(*data)
+
+        res = cml.mlink_dsp_mem_write(pointer(self._linkfd), index, len(data), data_c)
         self._raise_exception(res)
+
+    @_connect_decorate
+    def dsp_signal_read(self, signal_id, vector_size, vector_count, timeout=1000):
+        '''
+        Description:
+            Reads DSP signal
+        Usage:
+            data = dsp_signal_read(signal_id, vector_size, vector_count, timeout=1000)
+            signal_id - SIGNAL block identification number from XCOS model.
+            vector_size - SIGNAL block data size.
+            vector_count - vectors to read.
+            timeout - maximum amount of time to wait for data in miliseconds
+        '''
+        data_size = vector_size*vector_count
+        data = c_double *(data_size)
+        data = data()
+        res = cml.mlink_dsp_signal_read(signal_id, vector_size, byref(data), data_size, timeout)
+        self._raise_exception(res)
+
+        val_list = []
+
+        for vec in xrange(0, vector_count):
+            val_list.append([data[i] for i in xrange(0, vector_size)])
+
+        return val_list
 
     @_connect_decorate
     def dsp_stop(self):
@@ -196,19 +231,7 @@ class MLink:
         '''
         res = cml.mlink_dsp_stop(pointer(self._linkfd))
         self._raise_exception(res)
-
-    # TODO: doc - validate
     @_connect_decorate
-    def dsp_upload(self):
-        '''
-            Description:
-                Uploads DSP program to MicroDAQ memory.
-                DSP program will be loaded automatically after device reboot.
-            Usage:
-                dsp_upload()
-        '''
-        res = cml.mlink_dsp_upload(pointer(self._linkfd))
-        self._raise_exception(res)
 
     # ------------ DIGITAL IO FUNCTIONS ------------
     @_connect_decorate
@@ -419,14 +442,14 @@ class MLink:
             for i in range(len(channels) - 1):
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
-            raise MLinkError('ai_scan_init: Mode (is_differential parameter) vector should match selected AI channels')
+            raise MLinkError('ai_read: Mode (is_differential parameter) vector should match selected AI channels')
 
         if len(ai_range) == 2 and len(channels) != 1:
             range_cpy = ai_range
             for i in range(len(channels)-1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
-            raise MLinkError('ai_scan_init: Range vector should match selected AI channels!')
+            raise MLinkError('ai_read: Range vector should match selected AI channels!')
 
         channels_idx = c_int8 * len(channels)
         channels_idx = channels_idx(*channels)

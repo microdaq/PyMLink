@@ -666,40 +666,49 @@ for _lib in _libs.itervalues():
     mlink_disconnect_all.restype = c_void
     break
 
-# /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 44
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_load'):
+    if not hasattr(_lib, 'mlink_dsp_run'):
         continue
     mlink_dsp_load = _lib.mlink_dsp_load
     mlink_dsp_load.argtypes = [POINTER(c_int), String, String]
     mlink_dsp_load.restype = c_int
     break
 
-# /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 45
+
+#EXTERNC MDAQ_API int mlink_dsp_run(int *link_fd,  const char *dsp_binary_path, double period);
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_start'):
+    if not hasattr(_lib, 'mlink_dsp_run'):
         continue
-    mlink_dsp_start = _lib.mlink_dsp_start
-    mlink_dsp_start.argtypes = [POINTER(c_int)]
-    mlink_dsp_start.restype = c_int
+    mlink_dsp_run = _lib.mlink_dsp_run
+    mlink_dsp_run.argtypes = [POINTER(c_int), String, c_double]
+    mlink_dsp_run.restype = c_int
     break
 
-# /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 46
+#EXTERNC MDAQ_API int mlink_dsp_signal_read(int signal_id, int signal_size, double *data, int data_size, int timeout);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_dsp_signal_read'):
+        continue
+    mlink_dsp_signal_read = _lib.mlink_dsp_signal_read
+    mlink_dsp_signal_read.argtypes = [c_int, c_int, POINTER(c_double), c_int, c_int]
+    mlink_dsp_signal_read.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_dsp_mem_write(int *link_fd, int start_idx, int len, float *data);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_dsp_mem_write'):
+        continue
+    mlink_dsp_mem_write = _lib.mlink_dsp_mem_write
+    mlink_dsp_mem_write.argtypes = [POINTER(c_int), c_int, c_int, POINTER(c_float)]
+    mlink_dsp_mem_write.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_dsp_stop(int *link_fd );
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'mlink_dsp_stop'):
         continue
     mlink_dsp_stop = _lib.mlink_dsp_stop
     mlink_dsp_stop.argtypes = [POINTER(c_int)]
     mlink_dsp_stop.restype = c_int
-    break
-
-# /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 47
-for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_upload'):
-        continue
-    mlink_dsp_upload = _lib.mlink_dsp_upload
-    mlink_dsp_upload.argtypes = [POINTER(c_int)]
-    mlink_dsp_upload.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 50
