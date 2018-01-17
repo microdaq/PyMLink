@@ -620,15 +620,19 @@ for _lib in _libs.itervalues():
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 37
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_version'):
+    if not hasattr(_lib, 'mlink_fw_version'):
         continue
-    mlink_version = _lib.mlink_version
-    mlink_version.argtypes = [POINTER(c_int)]
-    if sizeof(c_int) == sizeof(c_void_p):
-        mlink_version.restype = ReturnString
-    else:
-        mlink_version.restype = String
-        mlink_version.errcheck = ReturnString
+    mlink_fw_version = _lib.mlink_fw_version
+    mlink_fw_version.argtypes = [POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int)]
+    mlink_fw_version.restype = c_int
+    break
+
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_lib_version'):
+        continue
+    mlink_lib_version = _lib.mlink_lib_version
+    mlink_lib_version.argtypes = [POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int), POINTER(c_int)]
+    mlink_lib_version.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 38

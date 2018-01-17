@@ -38,23 +38,8 @@ else:
     print 'This platform is not supported!'
     sys.exit()
 
-# Download needed binaries
 mlink_lib = lib_ver+lib_ext
 pack_data = {PYMLINK_VERSION: [mlink_lib]}
-
-try:
-    url = "https://github.com/microdaq/MLink/raw/master/"+mlink_lib
-
-    print 'Downloading MLink library from ' + url
-    bin = urllib2.urlopen(url)
-
-    mlink_lib = lib_prefix + mlink_lib
-    with open(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), 'wb') as output:
-        output.write(bin.read())
-    print '...done.'
-except:
-    print 'Cannot download MLink library. Check your internet connection and try again.'
-    sys.exit()
 
 # if linux then copy lib to standard location
 if os_name == 'Linux':
@@ -69,7 +54,7 @@ if os_name == 'Linux':
 
 tmp_dir = ''
 setup(name='PyMLink',
-      version='1.1',
+      version='1.1.1',
       author='Lukas Wit',
       author_email='lukas.w@embedded-solutions.pl',
       url='www.microdaq.org',

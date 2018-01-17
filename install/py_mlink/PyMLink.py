@@ -142,14 +142,39 @@ class MLink:
             self.connect(self._ip)
 
     @_connect_decorate
-    def get_version(self):
+    def get_fw_version(self):
+        '''
+        Description:
+            Returns version of MicroDAQ firmware 
+        Usage:
+            (major, minor, fix, build) = get_fw_version()
+         '''
+        major = c_int()
+        minor = c_int() 
+        fix = c_int()
+        build = c_int()
+
+        res = cml.mlink_fw_version(pointer(self._linkfd), pointer(major), pointer(minor), pointer(fix), pointer(build))
+        self._raise_exception(res)
+
+        return (major.value, minor.value, fix.value, build.value)
+
+    def get_lib_version(self):
         '''
         Description:
             Returns version of MLink library
         Usage:
-            get_version()
+            (major, minor, fix, build) = get_lib_version()
          '''
-        return cml.mlink_version(pointer(self._linkfd))
+        major = c_int()
+        minor = c_int() 
+        fix = c_int()
+        build = c_int()
+
+        res = cml.mlink_lib_version(pointer(self._linkfd), pointer(major), pointer(minor), pointer(fix), pointer(build))
+        self._raise_exception(res)
+
+        return (major.value, minor.value, fix.value, build.value)
 
     def hw_info(self):
         '''
