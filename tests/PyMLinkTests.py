@@ -82,31 +82,31 @@ IP = '10.10.1.1'
 #
 #
 #raw_input("Press Enter to continue...")
-print '\n\n****GET FIRMWARE VERSION TEST****'
-try:
-    mdaq = pml.MLink(IP)
-    print mdaq.get_lib_version.__doc__
-    print 'MLINK ver:',  mdaq.get_fw_version()
-    mdaq.disconnect()
-
-except pml.MLinkError, errval:
-    print "Error:", errval
-except:
-    print "Unexpected error:", sys.exc_info()[0]
-    raise
-
-#raw_input("Press Enter to continue...")
-print '\n\n****GET MLink VERSION TEST****'
-try:
-    mdaq = pml.MLink(IP)
-    print mdaq.get_lib_version.__doc__
-    print 'MLINK ver:',  mdaq.get_lib_version()
-    mdaq.disconnect()
-except pml.MLinkError, errval:
-    print "Error:", errval
-except:
-    print "Unexpected error:", sys.exc_info()[0]
-    raise
+#print '\n\n****GET FIRMWARE VERSION TEST****'
+#try:
+#    mdaq = pml.MLink(IP)
+#    print mdaq.get_lib_version.__doc__
+#    print 'MLINK ver:',  mdaq.get_fw_version()
+#    mdaq.disconnect()
+#
+#except pml.MLinkError, errval:
+#    print "Error:", errval
+#except:
+#    print "Unexpected error:", sys.exc_info()[0]
+#    raise
+#
+##raw_input("Press Enter to continue...")
+#print '\n\n****GET MLink VERSION TEST****'
+#try:
+#    mdaq = pml.MLink(IP)
+#    print mdaq.get_lib_version.__doc__
+#    print 'MLINK ver:',  mdaq.get_lib_version()
+#    mdaq.disconnect()
+#except pml.MLinkError, errval:
+#    print "Error:", errval
+#except:
+#    print "Unexpected error:", sys.exc_info()[0]
+#    raise
 #
 # raw_input("Press Enter to continue...")
 # print '\n\n****DSP FUNCTIONS TEST****'
@@ -374,25 +374,25 @@ except:
 #    print "Unexpected error:", sys.exc_info()[0]
 #    raise
 
-#print '\n\n****DSP signal 2 with MEM ****'
-#try:
-#    mdaq = pml.MLink(IP)
-#
-#    print mdaq.dsp_run.__doc__
-#    mdaq.dsp_run("model\signal-model.out", 0.1)
-#    mdaq.dsp_mem_write(1, [1, 2, 3, 4])
-#
-#    print mdaq.dsp_signal_read.__doc__
-#
-#    for i in range(0, 10):
-#        mdaq.dsp_mem_write(1, [1+i, 2, 3, 4])
-#        print mdaq.dsp_signal_read(4, 4, 1)
-#
-#    print mdaq.dsp_stop.__doc__
-#    mdaq.dsp_stop()
-#except:
-#    print "Unexpected error:", sys.exc_info()[0]
-#    raise
+print '\n\n****DSP signal 2 with MEM ****'
+try:
+    mdaq = pml.MLink(IP)
+
+    print mdaq.dsp_run.__doc__
+    mdaq.dsp_run("model\signal-model.out", 0.1)
+    mdaq.dsp_mem_write(1, [1, 2, 3, 4])
+
+    print mdaq.dsp_signal_read.__doc__
+
+    for i in range(0, 10):
+        mdaq.dsp_mem_write(1, [1+i, 2, 3, 4])
+        print mdaq.dsp_signal_read(4, 4, 1)
+
+    print mdaq.dsp_stop.__doc__
+    mdaq.dsp_stop()
+except:
+    print "Unexpected error:", sys.exc_info()[0]
+    raise
 
 
 
