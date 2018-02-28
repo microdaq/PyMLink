@@ -301,7 +301,7 @@ IP = '10.10.1.1'
 #
 # print '\n\n****SCILAB COMP TEST****'
 # try:
-#     mdaq = pml.MLink(IP, connectionless=True)
+#     mdaq = pml.MLink(IP, maintain_connection=True)
 #     tic = time.clock()
 #     mdaq.led_write(1, 1)
 #     toc = time.clock()
