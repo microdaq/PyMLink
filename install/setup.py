@@ -46,8 +46,8 @@ if os_name == 'Linux':
     pack_data = {}
     linux_lib_path = '/usr/lib/'
     try:
-        print 'Moving file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
-        shutil.move(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+mlink_lib))
+        print 'copying file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
+        shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+'lib'+mlink_lib))
     except:
         print '...failed.'
         sys.exit()
