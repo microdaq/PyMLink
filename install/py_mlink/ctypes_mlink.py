@@ -585,16 +585,17 @@ del loaderclass
 add_library_search_dirs([])
 
 # Begin libraries
-if platform.architecture()[0] == '32bit':
-        libname_ver = 'MLink32'
-elif platform.architecture()[0] == '64bit':
-        libname_ver = 'MLink64'
-else:
-        libname_ver = 'MLink'+platform.architecture()[0]
 
 libpath = ''
 if platform.system() == 'Windows':
     libpath = os.path.dirname(inspect.getfile(py_mlink))+'/'
+    if platform.architecture()[0] == '32bit':
+        libname_ver = 'MLink32'
+    elif platform.architecture()[0] == '64bit':
+        libname_ver = 'MLink64'
+
+if platform.system() == 'Linux':
+    libname_ver = 'mlink'
 
 libname_ver = libpath+libname_ver
 _libs["MLink"] = load_library(libname_ver)
