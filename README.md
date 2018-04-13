@@ -2,7 +2,7 @@
 
 This package allows users to use data acquisition under MicroDAQ hardware with Python. 
 It provides an interface between the MLink driver and Python. 
-The package works on Windows and Linux with Python 2.7.
+The package works on Windows and Linux with Python 2.6/2.7.
 
 ## Installation
 
