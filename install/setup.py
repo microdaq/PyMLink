@@ -52,9 +52,9 @@ elif os_name == 'Linux':
         shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+linux_lib_name), os.path.normpath(linux_lib_path+linux_lib_name))
     except:
         print '...failed. - try to run setup script with root privileges'
-        #sys.exit()
+        sys.exit()
 elif os_name == 'Darwin':
-    # copy lib to standard linux location
+    # copy lib to standard macos location
     try:
         if not os.path.exists(darwin_lib_path):
             os.makedirs(darwin_lib_path)
@@ -63,7 +63,7 @@ elif os_name == 'Darwin':
         shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name), os.path.normpath(darwin_lib_path+darwin_lib_name))
     except:
         print '...failed. - try to run setup script with root privileges'
-        #sys.exit()
+        sys.exit()
 else:
     print 'Your operating system is not supported!'
     exit
