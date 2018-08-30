@@ -188,16 +188,59 @@ class MLink:
 
     # ------------ DSP FUNCTIONS ------------
     @_connect_decorate
-    def dsp_run(self, dsp_firmware, step_time):
+    def dsp_init(self, dsp_firmware, rate, duration):
         '''
         Description:
-            Executes DSP program
+            Initializes DSP task
         Usage:
-            dsp_run(dsp_firmware, step_time)
+            dsp_init(dsp_firmware, rate, duration)
             dsp_firmware - XCos generated DSP application 
-            step_time - custom model mode step or -1 to keep Xcos settings 
+            rate - DSP application step per second rate (-1 - keep Xcos settings) 
+            duration - task duration in seconds (-1 - infinity)
         '''
-        res = cml.mlink_dsp_run(pointer(self._linkfd), dsp_firmware, step_time)
+        res = cml.mlink_dsp_init(pointer(self._linkfd), dsp_firmware, rate, duration)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def dsp_start(self):
+        '''
+        Description:
+            Starts DSP task
+        Usage:
+            dsp_start()
+        '''
+        res = cml.mlink_dsp_start(pointer(self._linkfd))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def dsp_is_done(self):
+        '''
+        Description:
+            Cheks if DSP task is done.    
+        Usage:
+            dsp_is_done()
+        '''
+        res = cml.mlink_dsp_is_done(pointer(self._linkfd))
+        self._raise_exception(res)
+
+        if res == 0:
+            return False
+        elif res == 1:
+            return True
+         
+    @_connect_decorate
+    def dsp_wait_until_done(self, timeout):
+        '''
+        Description:
+            Waits until DSP task is done.    
+        Usage:
+            dsp_wait_until_done(timeout)
+            timeout - amount of time in seconds to wait (-1 - wait indefinitely)
+        '''
+        if timeout > 0:
+            timeout = timeout * 1000
+
+        res = cml.mlink_dsp_wait_until_done(pointer(self._linkfd), timeout)
         self._raise_exception(res)
 
     @_connect_decorate
@@ -222,21 +265,22 @@ class MLink:
         self._raise_exception(res)
 
     @_connect_decorate
-    def dsp_signal_read(self, signal_id, vector_size, vector_count, timeout=1000):
+    def dsp_signal_read(self, signal_id, vector_size, vector_count, timeout=1):
         '''
         Description:
             Reads DSP signal
         Usage:
-            data = dsp_signal_read(signal_id, vector_size, vector_count, timeout=1000)
+            data = dsp_signal_read(signal_id, vector_size, vector_count, timeout=1)
             signal_id - SIGNAL block identification number from XCOS model.
             vector_size - SIGNAL block data size.
             vector_count - vectors to read.
-            timeout - maximum amount of time to wait for data in miliseconds
+            timeout - maximum amount of time to wait for data in seconds  
         '''
+        timeout = timeout * 1000
         data_size = vector_size*vector_count
         data = c_double *(data_size)
         data = data()
-        res = cml.mlink_dsp_signal_read(signal_id, vector_size, byref(data), data_size, timeout)
+        res = cml.mlink_dsp_signal_read(pointer(self._linkfd), signal_id, vector_size, byref(data), data_size, timeout)
         self._raise_exception(res)
 
         val_list = []
@@ -758,6 +802,44 @@ class MLink:
 
         res = cml.mlink_ao_scan(pointer(self._linkfd))
         self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan_wait_until_done(self, timeout):
+        '''
+        description:
+            Waits until AO scan is done.
+        usage:
+            ao_scan_wait_until_done(timeout)
+            timeout - amount of time in seconds to wait (-1 - wait indefinitely)
+        '''
+
+        if timeout > -1:
+            timeout = timeout * 1000
+
+        res = cml.mlink_ao_scan_wait_until_done(pointer(self._linkfd), timeout)
+        self._raise_exception(res)
+
+        if res == 0:
+            return False
+        elif res == 1:
+            return True 
+        
+    @_connect_decorate
+    def ao_scan_is_done(self):
+        '''
+        description:
+            checks if ao scan is done.
+        usage:
+            ao_scan_is_done()
+        '''
+
+        res = cml.mlink_ao_scan_is_done(pointer(self._linkfd))
+        self._raise_exception(res)
+
+        if res == 0:
+            return False
+        elif res == 1:
+            return True 
 
     @_connect_decorate
     def ao_scan_stop(self):

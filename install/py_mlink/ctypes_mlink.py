@@ -671,30 +671,50 @@ for _lib in _libs.itervalues():
     mlink_disconnect_all.restype = c_void
     break
 
+#EXTERNC MDAQ_API int mlink_dsp_init(int *link_fd, char *dsp_binary_path, double rate, double duration);
+
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_run'):
+    if not hasattr(_lib, 'mlink_dsp_init'):
         continue
-    mlink_dsp_load = _lib.mlink_dsp_load
-    mlink_dsp_load.argtypes = [POINTER(c_int), String, String]
-    mlink_dsp_load.restype = c_int
+    mlink_dsp_init = _lib.mlink_dsp_init
+    mlink_dsp_init.argtypes = [POINTER(c_int), String, c_double, c_double]
+    mlink_dsp_init.restype = c_int
     break
 
-
-#EXTERNC MDAQ_API int mlink_dsp_run(int *link_fd,  const char *dsp_binary_path, double period);
+#EXTERNC MDAQ_API int mlink_dsp_start(int *link_fd);
 for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_run'):
+    if not hasattr(_lib, 'mlink_dsp_start'):
         continue
-    mlink_dsp_run = _lib.mlink_dsp_run
-    mlink_dsp_run.argtypes = [POINTER(c_int), String, c_double]
-    mlink_dsp_run.restype = c_int
+    mlink_dsp_start = _lib.mlink_dsp_start
+    mlink_dsp_start.argtypes = [POINTER(c_int)]
+    mlink_dsp_start.restype = c_int
     break
 
-#EXTERNC MDAQ_API int mlink_dsp_signal_read(int signal_id, int signal_size, double *data, int data_size, int timeout);
+#EXTERNC MDAQ_API int mlink_dsp_is_done(int *link_fd);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_dsp_is_done'):
+        continue
+    mlink_dsp_is_done = _lib.mlink_dsp_is_done
+    mlink_dsp_is_done.argtypes = [POINTER(c_int)]
+    mlink_dsp_is_done.restype = c_int
+    break
+
+#EXTERNC mlink_dsp_wait_until_done(int *link_fd, int timeout);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_dsp_wait_until_done'):
+        continue
+    mlink_dsp_wait_until_done = _lib.mlink_dsp_wait_until_done
+    mlink_dsp_wait_until_done.argtypes = [POINTER(c_int), c_int]
+    mlink_dsp_wait_until_done.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_dsp_signal_read(int *link_fd, int signal_id, int signal_size, double *data, int data_size, int timeout);
+
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'mlink_dsp_signal_read'):
         continue
     mlink_dsp_signal_read = _lib.mlink_dsp_signal_read
-    mlink_dsp_signal_read.argtypes = [c_int, c_int, POINTER(c_double), c_int, c_int]
+    mlink_dsp_signal_read.argtypes = [POINTER(c_int), c_int, c_int, POINTER(c_double), c_int, c_int]
     mlink_dsp_signal_read.restype = c_int
     break
 
@@ -1045,6 +1065,24 @@ for _lib in _libs.itervalues():
     mlink_ao_scan_init.argtypes = [POINTER(c_int), POINTER(c_uint8), c_uint8, POINTER(c_float), c_int,
                                    POINTER(c_double), c_uint8, c_float, c_float]
     mlink_ao_scan_init.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_ao_scan_is_done(int *link_fd);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_scan_is_done'):
+        continue
+    mlink_ao_scan_is_done = _lib.mlink_ao_scan_is_done
+    mlink_ao_scan_is_done.argtypes = [POINTER(c_int)]
+    mlink_ao_scan_is_done.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_ao_scan_wait_until_done(int *link_fd, int timeout);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ao_scan_wait_until_done'):
+        continue
+    mlink_ao_scan_wait_until_done = _lib.mlink_ao_scan_wait_until_done
+    mlink_ao_scan_wait_until_done.argtypes = [POINTER(c_int), c_int]
+    mlink_ao_scan_wait_until_done.restype = c_int
     break
 
 for _lib in _libs.itervalues():
