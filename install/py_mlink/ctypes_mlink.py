@@ -594,7 +594,7 @@ if platform.system() == 'Windows':
     elif platform.architecture()[0] == '64bit':
         libname_ver = 'MLink64'
 
-if platform.system() == 'Linux':
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
     libname_ver = 'mlink'
 
 libname_ver = libpath+libname_ver

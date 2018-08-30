@@ -16,12 +16,17 @@ if sys.version_info[0] != 2 and sys.version_info[1] < 6:
 
 PYMLINK_VERSION = 'py_mlink'
 os_name = platform.system()
-lib_ext = None
 
+pack_data = {}
 arch_dir = ''
 
-# Check python platform version
 linux_lib_name = 'libmlink.so'
+linux_lib_path = '/usr/lib/'
+
+darwin_lib_name = 'libmlink.dylib'
+darwin_lib_path = '/usr/local/lib/'
+
+# Check python platform version
 if platform.architecture()[0] == '32bit':
     win_lib_name = 'MLink32.dll'
     arch_dir = 'x86/'
@@ -37,18 +42,27 @@ if os_name == 'Windows':
     pack_data = {PYMLINK_VERSION: [win_lib_name]}
     shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+win_lib_name), os.path.normpath(PYMLINK_VERSION+'/'+win_lib_name))
 elif os_name == 'Linux':
-    pack_data = {}
     # in case of arm processors take another binary
     if platform.uname()[4].startswith('arm'):
        arch_dir = 'armel/'
     
-    # if linux then copy lib to standard location
-    linux_lib_path = '/usr/lib/'
+    # copy lib to standard linux location
     try:
         print 'copying file '+PYMLINK_VERSION+'/'+arch_dir+linux_lib_name+' to '+linux_lib_path
         shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+linux_lib_name), os.path.normpath(linux_lib_path+linux_lib_name))
     except:
-        print '...failed.'
+        print '...failed. - try to run setup script with root privileges'
+        sys.exit()
+elif os_name == 'Darwin':
+    # copy lib to standard macos location
+    try:
+        if not os.path.exists(darwin_lib_path):
+            os.makedirs(darwin_lib_path)
+
+        print 'copying file '+PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name+' to '+darwin_lib_path
+        shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name), os.path.normpath(darwin_lib_path+darwin_lib_name))
+    except:
+        print '...failed. - try to run setup script with root privileges'
         sys.exit()
 else:
     print 'Your operating system is not supported!'
