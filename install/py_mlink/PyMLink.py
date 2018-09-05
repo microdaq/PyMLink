@@ -40,6 +40,13 @@ class AORange(object):
 
     AO_2_5V = [-2.5, 2.5]
 
+class Triggers(object):
+    AI_TRIGGER = 1
+    AO_TRIGGER = 2
+    DSP_START = 3
+    AI_SCAN_START = 2
+    AO_SCAN_START = 2
+
 
 class MLink:
     '''
@@ -282,11 +289,10 @@ class MLink:
         data = data()
         res = cml.mlink_dsp_signal_read(pointer(self._linkfd), signal_id, vector_size, byref(data), data_size, timeout)
         self._raise_exception(res)
-
         val_list = []
 
         for vec in xrange(0, vector_count):
-            val_list.append([data[i] for i in xrange(0, vector_size)])
+            val_list.append([data[i + (vec*vector_size)] for i in xrange(0, vector_size)])
 
         return val_list
 
@@ -601,23 +607,25 @@ class MLink:
 
         res = cml.mlink_ai_scan_init(pointer(self._linkfd), byref(channels_idx), len(channels), channels_range,
                                      byref(diff), pointer(rate), duration)
-        print res
         self._raise_exception(res)
 
     @_connect_decorate
-    def ai_scan(self, scan_count, blocking):
+    def ai_scan(self, scan_count, timeout):
         """
         Description:
             Starts scanning and reads scan data
         Usage:
-            ai_scan(scan_count, blocking)
+            ai_scan(scan_count, timeout)
             scan_count - number of scans to read
-            blocking - blocking or non-blocking read (True/False)
+            timeout - amount of time in seconds to wait for samples (-1 - wait indefinitely)
         """
+        if timeout > -1:
+            timeout = timeout * 1000
+
         data_len = scan_count*len(self._ai_scan_channels)
         channels_val = c_double * data_len
         channels_val = channels_val()
-        res = cml.mlink_ai_scan(byref(channels_val), scan_count, blocking)
+        res = cml.mlink_ai_scan(pointer(self._linkfd), byref(channels_val), scan_count, timeout)
         self._raise_exception(res)
 
         val_list = []
@@ -863,4 +871,162 @@ class MLink:
         '''
 
         res = cml.mlink_ai_scan_stop(pointer(self._linkfd))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ai_scan_trigger_dio(self, dio, level):
+        '''
+        Description:
+            Sets a trigger for analog input scan session. 
+        Usage:
+            ai_scan_trigger_dio(dio, level)
+            dio - DIO channel number 
+            level - 0 or 1  
+        '''
+
+        res = cml.mlink_scan_trigger_dio(pointer(self._linkfd), Triggers.AI_TRIGGER, dio, level)
+        self._raise_exception(res)
+        
+    @_connect_decorate
+    def ai_scan_trigger_clear(self):
+        '''
+        Description:
+            Clear triggers for analog input scan session.
+        Usage:
+            ai_scan_trigger_clear()
+        '''
+
+        res = cml.mlink_scan_trigger_clear(pointer(self._linkfd), Triggers.AI_TRIGGER)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ai_scan_trigger_dio_pattern(self, pattern):
+        '''
+        Description:
+            Sets a trigger for analog input scan session. 
+            Trigger occurs when defined digital pattern matches DIO1...8 
+            digital input channels state
+        Usage:
+            ai_scan_trigger_dio_pattern(pattern)
+            pattern - 8 character string:
+                1 - high state
+                0 - low state
+                x - undefined 
+                eg. "0xxx1x11"
+        '''
+
+        res = cml.mlink_scan_trigger_dio_pattern(pointer(self._linkfd), Triggers.AI_TRIGGER, pattern, len(pattern))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ai_scan_trigger_encoder(self, module, position, condition):
+        '''
+        Description:
+            Sets a trigger for analog input scan session.
+            Trigger occurs when value of selected encoder module 
+            is greater or lower then provided value
+        Usage:
+            ai_scan_trigger_encoder(module, position, condition)
+            module - encoder module (1|2)
+            position - encoder threshold value for trigger  
+            condition - 1: trigger when encoder value is greater than position parameter
+                        0: trigger when encoder value is lower than poisiotn parameter
+        '''
+
+        res = cml.mlink_scan_trigger_encoder(pointer(self._linkfd), Triggers.AI_TRIGGER, module, condition)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ai_scan_trigger_ext_start(self, source):
+        '''
+        Description:
+            Sets a trigger for analog input scan session based on external start event. 
+        Usage:
+            ai_scan_trigger_ext_start(source)
+            source - source of start event: 
+                     Triggers.AO_SCAN_START - start analog output scan session 
+                     Triggers.AI_SCAN_START - start analog input scan session  
+                     Triggers.DSP_START - start DSP program  
+        '''
+
+        res = cml.mlink_scan_trigger_external_start(pointer(self._linkfd), Triggers.AI_TRIGGER, source)
+        self._raise_exception(res)
+        
+    @_connect_decorate
+    def ao_scan_trigger_dio(self, dio, level):
+        '''
+        Description:
+            Sets a trigger for analog output scan session. 
+        Usage:
+            ao_scan_trigger_dio(dio, level)
+            dio - DIO channel number 
+            level - 0 or 1  
+        '''
+
+        res = cml.mlink_scan_trigger_dio(pointer(self._linkfd), Triggers.AO_TRIGGER, dio, level)
+        self._raise_exception(res)
+        
+    @_connect_decorate
+    def ao_scan_trigger_clear(self):
+        '''
+        Description:
+            Clear triggers for analog output scan session.
+        Usage:
+            ao_scan_trigger_clear()
+        '''
+
+        res = cml.mlink_scan_trigger_clear(pointer(self._linkfd), Triggers.AO_TRIGGER)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan_trigger_dio_pattern(self, pattern):
+        '''
+        Description:
+            Sets a trigger for analog output scan session. 
+            Trigger occurs when defined digital pattern matches DIO1...8 
+            digital input channels state
+        Usage:
+            ao_scan_trigger_dio_pattern(pattern)
+            pattern - 8 character string:
+                1 - high state
+                0 - low state
+                x - undefined 
+                eg. "0xxx1x11"
+        '''
+
+        res = cml.mlink_scan_trigger_dio_pattern(pointer(self._linkfd), Triggers.AO_TRIGGER, pattern, len(pattern))
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan_trigger_encoder(self, module, position, condition):
+        '''
+        Description:
+            Sets a trigger for analog output scan session.
+            Trigger occurs when value of selected encoder module 
+            is greater or lower then provided value
+        Usage:
+            ao_scan_trigger_encoder(module, position, condition)
+            module - encoder module (1|2)
+            position - encoder threshold value for trigger  
+            condition - 1: trigger when encoder value is greater than position parameter
+                        0: trigger when encoder value is lower than poisiotn parameter
+        '''
+
+        res = cml.mlink_scan_trigger_encoder(pointer(self._linkfd), Triggers.AO_TRIGGER, module, condition)
+        self._raise_exception(res)
+
+    @_connect_decorate
+    def ao_scan_trigger_ext_start(self, source):
+        '''
+        Description:
+            Sets a trigger for analog output scan session based on external start event. 
+        Usage:
+            ao_scan_trigger_ext_start(source)
+            source - source of start event: 
+                     Triggers.AO_SCAN_START - start analog output scan session 
+                     Triggers.AI_SCAN_START - start analog input scan session  
+                     Triggers.DSP_START - start DSP program  
+        '''
+
+        res = cml.mlink_scan_trigger_external_start(pointer(self._linkfd), Triggers.AO_TRIGGER, source)
         self._raise_exception(res)

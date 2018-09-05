@@ -962,7 +962,7 @@ for _lib in _libs.itervalues():
     if not hasattr(_lib, 'mlink_ai_scan'):
         continue
     mlink_ai_scan = _lib.mlink_ai_scan
-    mlink_ai_scan.argtypes = [POINTER(c_double), c_uint32, c_int32]
+    mlink_ai_scan.argtypes = [POINTER(c_int), POINTER(c_double), c_uint32, c_int32]
     mlink_ai_scan.restype = c_int
     break
 
@@ -1110,7 +1110,52 @@ for _lib in _libs.itervalues():
     mlink_ao_scan_stop.restype = c_int
     break
 
+#int mlink_scan_trigger_clear(int *link_fd, uint8_t trigger); 
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_scan_trigger_clear'):
+        continue
+    mlink_scan_trigger_clear = _lib.mlink_scan_trigger_clear
+    mlink_scan_trigger_clear.argtypes = [POINTER(c_int), c_uint8]
+    mlink_scan_trigger_clear.restype = c_int
+    break
+
+#int mlink_scan_trigger_dio(int *link_fd, uint8_t trigger, uint8_t dio, uint8_t level);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_scan_trigger_dio'):
+        continue
+    mlink_scan_trigger_dio = _lib.mlink_scan_trigger_dio
+    mlink_scan_trigger_dio.argtypes = [POINTER(c_int), c_uint8, c_uint8, c_uint8]
+    mlink_scan_trigger_dio.restype = c_int
+    break
+
+#int mlink_scan_trigger_dio_pattern(int *link_fd, uint8_t trigger,  char *pattern, int len);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_scan_trigger_dio_pattern'):
+        continue
+    mlink_scan_trigger_dio_pattern = _lib.mlink_scan_trigger_dio_pattern
+    mlink_scan_trigger_dio_pattern.argtypes = [POINTER(c_int), c_uint8, POINTER(c_char), c_uint8]
+    mlink_scan_trigger_dio_pattern.restype = c_int
+    break
+
+#int mlink_scan_trigger_encoder(int *link_fd, uint8_t trigger, uint8_t module, int32_t position, uint8_t slope);
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_scan_trigger_encoder'):
+        continue
+    mlink_scan_trigger_encoder = _lib.mlink_scan_trigger_encoder
+    mlink_scan_trigger_encoder.argtypes = [POINTER(c_int), c_uint8, c_uint8, c_int32, c_uint8]
+    mlink_scan_trigger_encoder.restype = c_int
+    break
+
+#int mlink_scan_trigger_external_start(int *link_fd, uint8_t trigger, uint8_t src); 
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_scan_trigger_external_start'):
+        continue
+    mlink_scan_trigger_external_start = _lib.mlink_scan_trigger_external_start
+    mlink_scan_trigger_external_start.argtypes = [POINTER(c_int), c_uint8, c_uint8]
+    mlink_scan_trigger_external_start.restype = c_int
+    break
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 15
+
 try:
     AO_0_TO_5V = 0
 except:
