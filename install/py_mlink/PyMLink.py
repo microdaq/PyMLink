@@ -551,7 +551,7 @@ class MLink:
     def ai_scan_init(self, channels, ai_range, is_differential, rate, duration):
         """
         Description:
-            Init AI scan
+            Initiates analog input scanning session
         Usage:
             ai_scan_init(channels, ai_range, is_differential, rate, duration)
             channels - analog input channels to read
@@ -687,7 +687,7 @@ class MLink:
     def ao_scan_init(self, channels, initial_data, ao_range, is_stream_mode, rate, duration):
         '''
         Description:
-            Initiates AO scan
+            Initiates analog output scanning session
         Usage:
             ao_scan_init(channels, initial_data, ao_range, is_stream_mode, rate, duration)
             channels - analog output channels to write
@@ -836,7 +836,7 @@ class MLink:
     def ao_scan_is_done(self):
         '''
         description:
-            checks if ao scan is done.
+            Checks if AO scan is done.
         usage:
             ao_scan_is_done()
         '''
@@ -853,7 +853,7 @@ class MLink:
     def ao_scan_stop(self):
         '''
         Description:
-            Stops AO scanning.
+            Stops AO scan.
         Usage:
             ao_scan_stop()
         '''
