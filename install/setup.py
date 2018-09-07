@@ -69,7 +69,7 @@ else:
     exit
 
 setup(name='PyMLink',
-      version='1.2.1',
+      version='1.3.0',
       author='Lukas Wit',
       author_email='lukas.w@embedded-solutions.pl',
       url='www.microdaq.org',
