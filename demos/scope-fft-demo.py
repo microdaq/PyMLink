@@ -47,7 +47,7 @@ mdaq.ai_scan_init(CHANNEL, PyMLink.AIRange.AI_5V, False, SAMPLE_RATE_HZ, DURATIO
 print 'Acquiring data...'
 for i in range((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT):
     # Get AI data
-    data = mdaq.ai_scan(DATA_COUNT, True)
+    data = mdaq.ai_scan(DATA_COUNT, -1)
 
     # Calc FFT and draw plots
     data = data - np.mean(data)

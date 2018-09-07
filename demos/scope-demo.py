@@ -30,7 +30,7 @@ plot = p.plot(x, y, pen="r")
 
 print 'Acquiring data...'
 for i in range((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT):
-    data = mdaq.ai_scan(DATA_COUNT, True)
+    data = mdaq.ai_scan(DATA_COUNT, -1)
     plot.setData(x, data[0])
     pg.QtGui.QApplication.processEvents()
 
