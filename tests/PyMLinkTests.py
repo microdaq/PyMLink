@@ -33,7 +33,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****LED TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -59,7 +59,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****SET AO TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -81,7 +81,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****GET FIRMWARE VERSION TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -109,7 +109,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****DIO FUNCTIONS E1000 TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -170,7 +170,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****FUNC KEY TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -189,7 +189,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****ENCODER TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -212,7 +212,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****PWM TEST****'
 try:
     pwm_module = 1
@@ -232,7 +232,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****AI TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -252,7 +252,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****AI SCAN TEST****'
 try:
     mdaq = pml.MLink(IP)
@@ -261,21 +261,12 @@ try:
     print mdaq.ai_scan_init.__doc__
     # channels, range, isDifferential, rate, duration
     mdaq.ai_scan_init([1, 2, 3], [-10, 10], [False, True, True], 1000, 1)
+
+    print mdaq.ai_scan.__doc__
     data = mdaq.ai_scan(1000, True)
 
-    # print data
-    print mdaq.ai_read.__doc__
-    #
-    # tic = time.clock()
-    # for i in range(50):
-    #     data = mdaq.ai_scan(1000, True)
-    #     for ch in data:
-    #         print ch
-    # toc = time.clock()
-    # print 'ai_scan exec time: %f sec' % (toc-tic)
-
     mdaq.disconnect()
-#
+
 except pml.MLinkError, errval:
     print "Error:", errval
 except:
@@ -296,7 +287,7 @@ except:
     print "Unexpected error:", sys.exc_info()[0]
     raise
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****AO SCAN TEST - SINGLE****'
 try:
     mdaq = pml.MLink(IP)
@@ -319,7 +310,7 @@ except:
     print "Unexpected error:", sys.exc_info()[0]
     raise
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****AO SCAN TEST - CONTINUOUS****'
 try:
     mdaq = pml.MLink(IP)
@@ -342,12 +333,12 @@ except:
     print "Unexpected error:", sys.exc_info()[0]
     raise
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****DSP signal - read signal ID 1 2 3 ****'
 try:
     mdaq = pml.MLink(IP)
     print mdaq.dsp_init.__doc__
-    mdaq.dsp_init("model\signal-model.out", 10, -1);
+    mdaq.dsp_init(os.path.join("model", "signal-model.out"), 10, -1);
     mdaq.dsp_start()
 
     print mdaq.dsp_signal_read.__doc__
@@ -367,7 +358,7 @@ try:
     mdaq = pml.MLink(IP)
 
     print mdaq.dsp_init.__doc__
-    mdaq.dsp_init("model\signal-model.out", 10, 2);
+    mdaq.dsp_init(os.path.join("model", "signal-model.out"), 10, 2);
     mdaq.dsp_mem_write(1, [1, 2, 3, 4])
     mdaq.dsp_start()
 
@@ -389,7 +380,7 @@ try:
     mdaq = pml.MLink(IP)
 
     print mdaq.dsp_init.__doc__
-    mdaq.dsp_init("model\signal-model.out", 100, 5);
+    mdaq.dsp_init(os.path.join("model", "signal-model.out"), 100, 5);
     print "Start executing DSP program"
     mdaq.dsp_start()
 
@@ -405,7 +396,7 @@ try:
     mdaq = pml.MLink(IP)
 
     print mdaq.dsp_init.__doc__
-    mdaq.dsp_init("model\signal-model.out", 100, -1);
+    mdaq.dsp_init(os.path.join("model", "signal-model.out"), 100, -1);
     mdaq.dsp_start()
 
     print mdaq.dsp_is_done.__doc__
@@ -418,7 +409,7 @@ except:
     raise
 
 
-raw_input("Press Enter to continue...")
+#raw_input("Press Enter to continue...")
 print '\n\n****AI TRIGGER - doc ****'
 try:
     mdaq = pml.MLink(IP)
@@ -442,7 +433,7 @@ try:
     except:
         print "No data to read." 
 
-    mdaq.dsp_init("model\signal-model.out", 100, -1);
+    mdaq.dsp_init(os.path.join("model", "signal-model.out"), 100, -1);
     mdaq.dsp_start()
 
     data = mdaq.ai_scan(10, 2)
