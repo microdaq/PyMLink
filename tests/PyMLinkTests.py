@@ -443,3 +443,26 @@ except:
     print "Unexpected error:", sys.exc_info()[0]
     raise
 
+
+#raw_input("Press Enter to continue...")
+print '\n\n****AI SYNC ****'
+try:
+    mdaq = pml.MLink(IP)
+
+    mdaq.dio_func(6, False)
+    mdaq.ai_scan_init([1], [-10, 10], False, 1000, -1)
+
+    print mdaq.ai_scan_sync.__doc__
+    mdaq.ai_scan_sync(8, pml.Triggers.EDGE_FALLING |  pml.Triggers.EDGE_RISING)
+
+    try:
+        data = mdaq.ai_scan(1000, 10)
+        for value in data[0]: 
+            print value 
+
+    except:
+        print "No data to read." 
+    
+except:
+    print "Unexpected error:", sys.exc_info()[0]
+    raise

@@ -975,6 +975,14 @@ for _lib in _libs.itervalues():
     mlink_ai_scan_stop.restype = c_int
     break
 
+for _lib in _libs.itervalues():
+    if not hasattr(_lib, 'mlink_ai_scan_sync'):
+        continue
+    mlink_ai_scan_sync = _lib.mlink_ai_scan_sync
+    mlink_ai_scan_sync.argtypes = [POINTER(c_int), c_uint8, c_int8]
+    mlink_ai_scan_sync.restype = c_int
+    break
+
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 90
 for _lib in _libs.itervalues():
     if not hasattr(_lib, 'mlink_pru_mem_set'):

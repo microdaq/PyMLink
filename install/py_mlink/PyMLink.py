@@ -46,6 +46,8 @@ class Triggers(object):
     DSP_START = 3
     AI_SCAN_START = 2
     AO_SCAN_START = 2
+    EDGE_FALLING = 1
+    EDGE_RISING = 2
 
 
 class MLink:
@@ -633,6 +635,21 @@ class MLink:
             val_list.append([channels_val[i+channel] for i in xrange(0, scan_count, len(self._ai_scan_channels))])
 
         return val_list
+
+    @_connect_decorate
+    def ai_scan_sync(self, dio, edge):
+        """
+        Description:
+            Synchronizes analog input conversion with digital input
+        Usage:
+            ai_scan_sync(dio, edge)
+            dio - digital input line (1..8)
+            edge - type of digital signal edge which triggers ADC conversion 
+                   1 - falling edge, 2 - rising edge, 3 - falling or rising edge 
+        """
+
+        res = cml.mlink_ai_scan_sync(pointer(self._linkfd), dio, edge)
+        self._raise_exception(res)
 
     @_connect_decorate
     def ao_write(self, channels, ao_range, data):
