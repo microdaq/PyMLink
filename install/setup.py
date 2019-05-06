@@ -4,14 +4,14 @@
 
 from distutils.core import setup
 import platform
-import urllib2
+import urllib.request, urllib.error, urllib.parse
 import os
 import sys
 import shutil
 
 # check python version
 if sys.version_info[0] != 2 and sys.version_info[1] < 6:
-    print 'Run this script with Python2.6/2.7!'
+    print('Run this script with Python2.6/2.7!')
     sys.exit(1)
 
 PYMLINK_VERSION = 'py_mlink'
@@ -34,7 +34,7 @@ elif platform.architecture()[0] == '64bit':
     win_lib_name = 'MLink64.dll'
     arch_dir = 'x64/'
 else:
-    print 'Your platform is not supported!'
+    print('Your platform is not supported!')
     sys.exit()
 
 # Check OS
@@ -48,10 +48,10 @@ elif os_name == 'Linux':
     
     # copy lib to standard linux location
     try:
-        print 'copying file '+PYMLINK_VERSION+'/'+arch_dir+linux_lib_name+' to '+linux_lib_path
+        print('copying file '+PYMLINK_VERSION+'/'+arch_dir+linux_lib_name+' to '+linux_lib_path)
         shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+linux_lib_name), os.path.normpath(linux_lib_path+linux_lib_name))
     except:
-        print '...failed. - try to run setup script with root privileges'
+        print('...failed. - try to run setup script with root privileges')
         sys.exit()
 elif os_name == 'Darwin':
     # copy lib to standard macos location
@@ -59,13 +59,13 @@ elif os_name == 'Darwin':
         if not os.path.exists(darwin_lib_path):
             os.makedirs(darwin_lib_path)
 
-        print 'copying file '+PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name+' to '+darwin_lib_path
+        print('copying file '+PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name+' to '+darwin_lib_path)
         shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name), os.path.normpath(darwin_lib_path+darwin_lib_name))
     except:
-        print '...failed. - try to run setup script with root privileges'
+        print('...failed. - try to run setup script with root privileges')
         sys.exit()
 else:
-    print 'Your operating system is not supported!'
+    print('Your operating system is not supported!')
     exit
 
 setup(name='PyMLink',
@@ -81,8 +81,8 @@ setup(name='PyMLink',
       )
 
 try:
-    print 'Removing ', os.path.abspath('build')
+    print('Removing ', os.path.abspath('build'))
     shutil.rmtree('build')
-    print '...done.'
+    print('...done.')
 except:
-    print '...failed.'
+    print('...failed.')

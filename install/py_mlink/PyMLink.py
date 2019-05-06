@@ -1,9 +1,9 @@
-# MLink Python2.7 binding
+# MLink Python binding
 # visit site www.microdaq.org
 # Embedded-solutions, November 2017
 
-import ctypes_mlink as cml
 from ctypes import *
+import ctypes_mlink as cml
 from functools import wraps
 
 
@@ -87,7 +87,7 @@ class MLink:
         if res == -1:
             raise MLinkError('Session timeout, restore connection with reconnect() or connect(ip) method.')
         elif res < -1:
-            print 'Error code:', res
+            print('Error code:', res)
             raise MLinkError(self._get_error(res))
 
     def _connect_decorate(func):
@@ -193,7 +193,7 @@ class MLink:
             hw_info()
          '''
 
-        print 'MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
+        print('MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid))
 
     # ------------ DSP FUNCTIONS ------------
     @_connect_decorate
@@ -293,8 +293,8 @@ class MLink:
         self._raise_exception(res)
         val_list = []
 
-        for vec in xrange(0, vector_count):
-            val_list.append([data[i + (vec*vector_size)] for i in xrange(0, vector_size)])
+        for vec in range(0, vector_count):
+            val_list.append([data[i + (vec*vector_size)] for i in range(0, vector_size)])
 
         return val_list
 
@@ -542,7 +542,7 @@ class MLink:
                                 byref(diff), byref(channels_val))
         self._raise_exception(res)
 
-        val_list = [channels_val[i] for i in xrange(len(channels))]
+        val_list = [channels_val[i] for i in range(len(channels))]
         if len(val_list) == 1:
             return val_list[0]
         else:
@@ -631,8 +631,8 @@ class MLink:
         self._raise_exception(res)
 
         val_list = []
-        for channel in xrange(0, len(self._ai_scan_channels)):
-            val_list.append([channels_val[i+channel] for i in xrange(0, scan_count, len(self._ai_scan_channels))])
+        for channel in range(0, len(self._ai_scan_channels)):
+            val_list.append([channels_val[i+channel] for i in range(0, scan_count, len(self._ai_scan_channels))])
 
         return val_list
 
