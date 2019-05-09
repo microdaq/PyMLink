@@ -1,6 +1,6 @@
-'''
-Do not modify this file. Auto generated.
-'''
+# MLink Python 3 binding
+# visit site www.microdaq.org
+# Embedded-solutions, November 2017-2019
 
 __docformat__ =  'restructuredtext'
 
@@ -128,7 +128,6 @@ class UserString:
     def isdecimal(self): return self.data.isdecimal()
     def isdigit(self): return self.data.isdigit()
     def islower(self): return self.data.islower()
-    def isnumeric(self): return self.data.isnumeric()
     def isspace(self): return self.data.isspace()
     def istitle(self): return self.data.istitle()
     def isupper(self): return self.data.isupper()
@@ -201,7 +200,7 @@ class MutableString(UserString):
         elif isinstance(sub, str):
             self.data = self.data[:start]+sub+self.data[end:]
         else:
-            self.data =  self.data[:start]+str(sub)+self.data[end:]
+            self.data =    self.data[:start]+str(sub)+self.data[end:]
     def __delslice__(self, start, end):
         start = max(start, 0); end = max(end, 0)
         self.data = self.data[:start] + self.data[end:]
@@ -650,7 +649,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_connect'):
         continue
     mlink_connect = _lib.mlink_connect
-    mlink_connect.argtypes = [String, c_uint16, POINTER(c_int)]
+    mlink_connect.argtypes = [c_char_p, c_uint16, POINTER(c_int)]
     mlink_connect.restype = c_int
     break
 
@@ -677,7 +676,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dsp_init'):
         continue
     mlink_dsp_init = _lib.mlink_dsp_init
-    mlink_dsp_init.argtypes = [POINTER(c_int), String, c_double, c_double]
+    mlink_dsp_init.argtypes = [POINTER(c_int), c_char_p, c_double, c_double]
     mlink_dsp_init.restype = c_int
     break
 
@@ -831,7 +830,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_exec'):
         continue
     mlink_pru_exec = _lib.mlink_pru_exec
-    mlink_pru_exec.argtypes = [POINTER(c_int), String, c_uint8, c_uint8]
+    mlink_pru_exec.argtypes = [POINTER(c_int), c_char_p, c_uint8, c_uint8]
     mlink_pru_exec.restype = c_int
     break
 
@@ -876,7 +875,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_uart_read'):
         continue
     mlink_uart_read = _lib.mlink_uart_read
-    mlink_uart_read.argtypes = [POINTER(c_int), c_uint8, String, c_uint32, c_int32]
+    mlink_uart_read.argtypes = [POINTER(c_int), c_uint8, c_char_p, c_uint32, c_int32]
     mlink_uart_read.restype = c_int
     break
 
@@ -885,7 +884,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_uart_write'):
         continue
     mlink_uart_write = _lib.mlink_uart_write
-    mlink_uart_write.argtypes = [POINTER(c_int), c_uint8, String, c_uint32]
+    mlink_uart_write.argtypes = [POINTER(c_int), c_uint8, c_char_p, c_uint32]
     mlink_uart_write.restype = c_int
     break
 
@@ -1006,7 +1005,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_get_obj_size'):
         continue
     mlink_get_obj_size = _lib.mlink_get_obj_size
-    mlink_get_obj_size.argtypes = [POINTER(c_int), String, POINTER(c_uint32)]
+    mlink_get_obj_size.argtypes = [POINTER(c_int), c_char_p, POINTER(c_uint32)]
     mlink_get_obj_size.restype = c_int
     break
 
@@ -1015,7 +1014,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_get_obj'):
         continue
     mlink_get_obj = _lib.mlink_get_obj
-    mlink_get_obj.argtypes = [POINTER(c_int), String, POINTER(None), c_uint32]
+    mlink_get_obj.argtypes = [POINTER(c_int), c_char_p, POINTER(None), c_uint32]
     mlink_get_obj.restype = c_int
     break
 
@@ -1024,7 +1023,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_set_obj'):
         continue
     mlink_set_obj = _lib.mlink_set_obj
-    mlink_set_obj.argtypes = [POINTER(c_int), String, POINTER(None), c_uint32]
+    mlink_set_obj.argtypes = [POINTER(c_int), c_char_p, POINTER(None), c_uint32]
     mlink_set_obj.restype = c_int
     break
 
