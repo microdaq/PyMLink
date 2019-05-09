@@ -4,14 +4,14 @@
 
 from distutils.core import setup
 import platform
-import urllib.request, urllib.error, urllib.parse
+#import urllib.request, urllib.error, urllib.parse
 import os
 import sys
 import shutil
 
 # check python version
-if sys.version_info[0] != 2 and sys.version_info[1] < 6:
-    print('Run this script with Python2.6/2.7!')
+if sys.version_info[0] == 2 and sys.version_info[1] < 6:
+    print('Python2.6 and above are supported!')
     sys.exit(1)
 
 PYMLINK_VERSION = 'py_mlink'

@@ -10,7 +10,7 @@ try:
     import pyqtgraph as pg
     from pyqtgraph.Qt import QtCore
 except ImportError:
-    print 'To run this demo you have to install pyqtgraph and (PyQt4/5 or PySide).'
+    print('To run this demo you have to install pyqtgraph and (PyQt4/5 or PySide).')
 
 # to suppress "Qpicture: invalid format version 0" warning
 QtCore.qInstallMsgHandler(lambda *args: None)
@@ -44,7 +44,7 @@ mdaq = PyMLink.MLink('10.10.1.1')
 # Init analog input scan
 mdaq.ai_scan_init(CHANNEL, PyMLink.AIRange.AI_5V, False, SAMPLE_RATE_HZ, DURATION_SEC)
 
-print 'Acquiring data...'
+print('Acquiring data...')
 for i in range((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT):
     # Get AI data
     data = mdaq.ai_scan(DATA_COUNT, -1)
@@ -59,6 +59,6 @@ for i in range((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT):
     pg.QtGui.QApplication.processEvents()
 
 win.close()
-print 'done.'
+print('done.')
 
 

@@ -140,7 +140,6 @@ class MLink:
         self._linkfd = ctypes.c_int32()
         self._ip = ip
 
-        print(cml.mlink_connect.argtypes)
         res = cml.mlink_connect(ip.encode(), 4343, ctypes.pointer(self._linkfd))
         self._raise_exception(res)
 

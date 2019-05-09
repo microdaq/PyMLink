@@ -6,7 +6,7 @@ from py_mlink import PyMLink
 try:
     import pyqtgraph as pg
 except ImportError:
-    print 'To run this demo you have to install pyqtgraph and (PyQt4/5 or PySide).'
+    print('To run this demo you have to install pyqtgraph and (PyQt4/5 or PySide).')
 
 DATA_COUNT = 5000
 SAMPLE_RATE_HZ = 100000
@@ -28,13 +28,13 @@ x = [i for i in range(0, DATA_COUNT)]
 y = [0 for i in range(0, DATA_COUNT)]
 plot = p.plot(x, y, pen="r")
 
-print 'Acquiring data...'
+print('Acquiring data...')
 for i in range((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT):
     data = mdaq.ai_scan(DATA_COUNT, -1)
     plot.setData(x, data[0])
     pg.QtGui.QApplication.processEvents()
 
 win.close()
-print 'done.'
+print('done.')
 
 

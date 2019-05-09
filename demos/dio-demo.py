@@ -31,5 +31,5 @@ mdaq.dio_write(DO, DO_state)
 
 # Print data
 for i, di in enumerate(di_state):
-    print 'DI[%d]: %d' % (i, di)
+    print('DI[%d]: %d' % (i, di))
 

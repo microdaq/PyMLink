@@ -12,7 +12,7 @@ data = mdaq.ai_read([1, 2, 3, 4], [-10, 10], False)
 
 # Print data
 for i, volt in enumerate(data):
-    print 'Channel[%d]: %f V' % (i, volt)
+    print('Channel[%d]: %f V' % (i, volt) )
 
 
 

@@ -5,8 +5,8 @@
 from py_mlink import PyMLink
 
 # Print documentation e.g:
-print PyMLink.MLink.__doc__
-print PyMLink.MLink.ai_scan_init.__doc__
+print(PyMLink.MLink.__doc__)
+print(PyMLink.MLink.ai_scan_init.__doc__)
 
 # Connect to MicroDAQ device without worrying about connection timeout (maintain_connection=True)
 # this option has slightly less performance
@@ -18,8 +18,8 @@ mdaq.hw_info()
 # Catch MLink errors
 try:
     mdaq.ai_read(99, [-10, 10], False)
-except PyMLink.MLinkError, errval:
-    print "Error:", errval
+except PyMLink.MLinkError as errval:
+    print("Error:", errval)
 
     # Close connection
     mdaq.disconnect()
