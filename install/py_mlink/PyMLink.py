@@ -1,6 +1,6 @@
-# MLink Python 3 binding
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# MLink Python 2/3 binding
+# www.microdaq.org
+# Embedded-solutions 2017-2019
 
 import ctypes
 from functools import wraps
@@ -70,7 +70,7 @@ class MLink:
         Main class of MLink Python2.7 binding.
     Usage:
         MLink(ip, maintain_connection=False)
-        ip - ip address of MicroDAQ device
+        ip - IP address of MicroDAQ device
         maintain_connection - True or False
             True  - more convenient, no needs to keep connection (each function call connect()
                     method), slightly less performance
@@ -134,7 +134,7 @@ class MLink:
             Connects to MicroDAQ device
         Usage:
             connect(ip)
-            ip - ip address
+            ip - MicroDAQ IP address
         """
 
         self._linkfd = ctypes.c_int32()
@@ -146,7 +146,7 @@ class MLink:
     def reconnect(self):
         """
         Description:
-            Connects to MicroDAQ device with latest ip
+            Connects to MicroDAQ device with most recent IP address
             obtained from class constructor or connect method
         Usage:
             reconnect()
@@ -160,7 +160,7 @@ class MLink:
     def get_fw_version(self):
         """
         Description:
-            Returns version of MicroDAQ firmware
+            Returns the MicroDAQ firmware version
         Usage:
             (major, minor, fix, build) = get_fw_version()
          """
@@ -184,7 +184,7 @@ class MLink:
     def get_lib_version(self):
         """
         Description:
-            Returns version of MLink library
+            Returns the MLink library version
         Usage:
             (major, minor, fix, build) = get_lib_version()
          """
@@ -207,7 +207,7 @@ class MLink:
     def hw_info(self):
         """
         Description:
-            Prints model of connected MicroDAQ device
+            Prints model of a connected MicroDAQ device
         Usage:
             hw_info()
          """
@@ -215,13 +215,13 @@ class MLink:
         print('MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid))
 
     @_connect_decorate
-    def dsp_init(self, dsp_firmware, rate, duration):
+    def dsp_init(self, dsp_application, rate, duration):
         """
         Description:
-            Initializes DSP task
+            Initializes DSP processor with given applicaiton
         Usage:
             dsp_init(dsp_firmware, rate, duration)
-            dsp_firmware - XCos generated DSP application
+            dsp_application - XCos generated DSP application
             rate - DSP application step per second rate (-1 - keep Xcos settings)
             duration - task duration in seconds (-1 - infinity)
         """
@@ -238,7 +238,7 @@ class MLink:
     def dsp_start(self):
         """
         Description:
-            Starts DSP task
+            Starts execution of DSP application
         Usage:
             dsp_start()
         """
@@ -251,7 +251,7 @@ class MLink:
     def dsp_is_done(self):
         """
         Description:
-            Cheks if DSP task is done.
+            Cheks if DSP execution is done.
         Usage:
             dsp_is_done()
         """
@@ -269,7 +269,7 @@ class MLink:
     def dsp_wait_until_done(self, timeout):
         """
         Description:
-            Waits until DSP task is done.
+            Waits until DSP application is done.
         Usage:
             dsp_wait_until_done(timeout)
             timeout - amount of time in seconds to wait (-1 - wait indefinitely)
@@ -286,11 +286,11 @@ class MLink:
     def dsp_mem_write(self, index, data):
         """
         Description:
-            Writes data to MicroDAQ memory which can be accessed
-            via MEM read block in XCOS model.
+            Writes data to MicroDAQ memory accesable by XCos 
+            MEM read block.
         Usage:
             dsp_mem_write(index, data)
-            index - memory index
+            index - memory beggining index
             data - data to be written
         """
         
@@ -312,7 +312,7 @@ class MLink:
     def dsp_signal_read(self, signal_id, vector_size, vector_count, timeout=1):
         """
         Description:
-            Reads DSP signal
+            Reads data from DSP application during its execution
         Usage:
             data = dsp_signal_read(signal_id, vector_size, vector_count, timeout=1)
             signal_id - SIGNAL block identification number from XCOS model.
@@ -393,8 +393,7 @@ class MLink:
         Description:
             Reads DIO state
         Usage:
-            dio_dir(dio)
-            bank - bank number (1-4)
+            dio_read(dio)
             dio - DIO number
         """
         if not isinstance(dio, list):
@@ -418,7 +417,7 @@ class MLink:
         Description:
             Writes DIO state
         Usage:
-            mdaq_dio_write(dio, state)
+            dio_write(dio, state)
             dio - DIO numbers
             state - DIO output states
         """
@@ -456,9 +455,9 @@ class MLink:
     def led_write(self, led_id, state):
         """
         Description:
-            Sets MicroDAQ D1 and D2 LED state
+            Sets MicroDAQ LEDs state
         Usage:
-            set_led(led, state)
+            led_write(led, state)
             led - LED number (1 or 2)
             state - LED state (True - ON, False - OFF)
         """
@@ -641,7 +640,7 @@ class MLink:
                 AIRange.AI_10V  -    single-range argument applied for all used channels
                 AIRange.AI_10V  + AIRange.AI_5V  - multi-range argument for two channels
 
-            is_differential - scalar or array with measurement mode settings:
+            is_differential - scalar or array with terminal configuration settings:
                               True  - differential
                               False - single-ended mode
             rate - analog input scan frequency [Hz]
@@ -723,21 +722,6 @@ class MLink:
             val_list.append([channels_val[i+channel] for i in range(0, scan_count, len(self._ai_scan_channels))])
 
         return val_list
-
-    @_connect_decorate
-    def ai_scan_sync(self, dio, edge):
-        """
-        Description:
-            Synchronizes analog input conversion with digital input
-        Usage:
-            ai_scan_sync(dio, edge)
-            dio - digital input line (1..8)
-            edge - type of digital signal edge which triggers ADC conversion 
-                   1 - falling edge, 2 - rising edge, 3 - falling or rising edge 
-        """
-
-        res = cml.mlink_ai_scan_sync(ctypes.pointer(self._linkfd), dio, edge)
-        self._raise_exception(res)
 
     @_connect_decorate
     def ao_write(self, channels, ao_range, data):
@@ -877,6 +861,7 @@ class MLink:
     @_connect_decorate
     def ao_scan_data(self, channels, data, opt=True):
         """
+        TODO: 
         Description:
            Queues data to be output
         Usage:
@@ -931,7 +916,7 @@ class MLink:
     def ao_scan(self):
         """
         Description:
-            Starts AO scanning.
+            Starts signal generation.
         Usage:
             ao_scan()
         """
@@ -943,7 +928,7 @@ class MLink:
     def ao_scan_wait_until_done(self, timeout):
         """
         description:
-            Waits until AO scan is done.
+            Waits until signal generation is done.
         usage:
             ao_scan_wait_until_done(timeout)
             timeout - amount of time in seconds to wait (-1 - wait indefinitely)
@@ -964,7 +949,7 @@ class MLink:
     def ao_scan_is_done(self):
         """
         description:
-            Checks if AO scan is done.
+            Checks if signal generation is completed.
         usage:
             ao_scan_is_done()
         """
@@ -981,7 +966,7 @@ class MLink:
     def ao_scan_stop(self):
         """
         Description:
-            Stops AO scan.
+            Stops signal generation.
         Usage:
             ao_scan_stop()
         """
