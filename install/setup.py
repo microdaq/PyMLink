@@ -102,6 +102,7 @@ setup(
     extras_require={
         'demos':[
             'numpy',
+            'pyqt5',
             'pyqtgraph'
         ]
     }
