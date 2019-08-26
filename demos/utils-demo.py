@@ -1,6 +1,6 @@
 # Utils demo
 # visit site www.microdaq.org
-# Embedded-solutions, November 2017
+# Embedded-solutions, November 2017-2019
 
 from py_mlink import PyMLink
 
@@ -8,7 +8,8 @@ from py_mlink import PyMLink
 print(PyMLink.MLink.__doc__)
 print(PyMLink.MLink.ai_scan_init.__doc__)
 
-# Connect to MicroDAQ device without worrying about connection timeout (maintain_connection=True)
+# Connect to MicroDAQ device without worrying about
+# connection timeout (maintain_connection=True)
 # this option has slightly less performance
 mdaq = PyMLink.MLink('10.10.1.1', maintain_connection=True)
 

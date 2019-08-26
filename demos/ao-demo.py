@@ -1,6 +1,6 @@
 # Analog output demo
 # visit site www.microdaq.org
-# Embedded-solutions, November 2017
+# Embedded-solutions, November 2017-2019
 
 from py_mlink import PyMLink
 

@@ -1,9 +1,10 @@
 # LED demo
 # visit site www.microdaq.org
-# Embedded-solutions, November 2017
+# Embedded-solutions, November 2017-2019
+
+import time
 
 from py_mlink import PyMLink
-import time
 
 # Create MLink object, connect to MicroDAQ device
 mdaq = PyMLink.MLink('10.10.1.1')
