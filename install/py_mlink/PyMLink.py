@@ -228,7 +228,7 @@ class MLink:
 
         res = cml.mlink_dsp_init(
             ctypes.pointer(self._linkfd),
-            dsp_firmware.encode(),
+            dsp_application.encode(),
             rate,
             duration)
 
@@ -994,7 +994,7 @@ class MLink:
             ai_scan_stop()
         """
 
-        res = cml.mlink_ai_scan_stop(pointer(self._linkfd))
+        res = cml.mlink_ai_scan_stop(ctypes.pointer(self._linkfd))
         self._raise_exception(res)
 
     @_connect_decorate
