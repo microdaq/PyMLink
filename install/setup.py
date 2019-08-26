@@ -1,18 +1,22 @@
 # PyMLink installation script
 # visit site www.microdaq.org
-# Embedded-solutions, November 2017
+# Embedded-solutions, November 2017-2019
 
-from distutils.core import setup
 import platform
-#import urllib.request, urllib.error, urllib.parse
 import os
 import sys
 import shutil
+from distutils.core import setup
 
-# check python version
-if sys.version_info[0] == 2 and sys.version_info[1] < 6:
+
+def invalid_python_version():
+    return sys.version_info[0] == 2 and sys.version_info[1] < 6
+
+
+if invalid_python_version():
     print('Python2.6 and above are supported!')
     sys.exit(1)
+
 
 PYMLINK_VERSION = 'py_mlink'
 os_name = platform.system()
@@ -40,7 +44,10 @@ else:
 # Check OS
 if os_name == 'Windows':
     pack_data = {PYMLINK_VERSION: [win_lib_name]}
-    shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+win_lib_name), os.path.normpath(PYMLINK_VERSION+'/'+win_lib_name))
+    shutil.copy(
+        os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+win_lib_name),
+        os.path.normpath(PYMLINK_VERSION+'/'+win_lib_name))
+
 elif os_name == 'Linux':
     # in case of arm processors take another binary
     if platform.uname()[4].startswith('arm'):
@@ -48,41 +55,64 @@ elif os_name == 'Linux':
     
     # copy lib to standard linux location
     try:
-        print('copying file '+PYMLINK_VERSION+'/'+arch_dir+linux_lib_name+' to '+linux_lib_path)
-        shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+linux_lib_name), os.path.normpath(linux_lib_path+linux_lib_name))
-    except:
+        print(
+            'copying file '+PYMLINK_VERSION+'/'
+            + arch_dir + linux_lib_name+' to '
+            + linux_lib_path)
+        shutil.copy(
+            os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+linux_lib_name),
+            os.path.normpath(linux_lib_path+linux_lib_name)
+        )
+    except OSError:
         print('...failed. - try to run setup script with root privileges')
-        sys.exit()
+        sys.exit(1)
+
 elif os_name == 'Darwin':
     # copy lib to standard macos location
     try:
         if not os.path.exists(darwin_lib_path):
             os.makedirs(darwin_lib_path)
 
-        print('copying file '+PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name+' to '+darwin_lib_path)
-        shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name), os.path.normpath(darwin_lib_path+darwin_lib_name))
-    except:
+        print(
+            'copying file '+PYMLINK_VERSION
+            + '/'+arch_dir+darwin_lib_name
+            + ' to '+darwin_lib_path
+        )
+        shutil.copy(
+            os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name),
+            os.path.normpath(darwin_lib_path+darwin_lib_name))
+    except OSError:
         print('...failed. - try to run setup script with root privileges')
-        sys.exit()
+        sys.exit(1)
 else:
     print('Your operating system is not supported!')
-    exit
+    sys.exit(1)
 
-setup(name='PyMLink',
-      version='1.3.0',
-      author='Lukas Wit',
-      author_email='lukas.w@embedded-solutions.pl',
-      url='www.microdaq.org',
-      description='Python2.6/2.7 binding of MLink library.',
-      license='BSD',
-      packages = [PYMLINK_VERSION],
-      package_dir = {PYMLINK_VERSION: PYMLINK_VERSION},
-      package_data = pack_data,
-      )
+setup(
+    name='PyMLink',
+    version='1.3.0',
+    author='Lukas Wit',
+    author_email='lukas.w@embedded-solutions.pl',
+    url='www.microdaq.org',
+    description='Python 2.6 and above binding of MLink library.',
+    license='BSD',
+    packages=[PYMLINK_VERSION],
+    package_dir={PYMLINK_VERSION: PYMLINK_VERSION},
+    package_data=pack_data,
+    extras_require={
+        'demos':[
+            'numpy',
+            'pyqtgraph'
+        ]
+    }
+)
 
 try:
     print('Removing ', os.path.abspath('build'))
     shutil.rmtree('build')
     print('...done.')
-except:
+    sys.exit(0)
+
+except OSError:
     print('...failed.')
+    sys.exit(1)
