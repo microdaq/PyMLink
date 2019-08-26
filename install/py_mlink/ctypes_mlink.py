@@ -803,7 +803,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_enc_init'):
         continue
     mlink_enc_init = _lib.mlink_enc_init
-    mlink_enc_init.argtypes = [POINTER(c_int), c_uint8, c_int32]
+    mlink_enc_init.argtypes = [POINTER(c_int), c_uint8, c_uint8, c_int32]
     mlink_enc_init.restype = c_int
     break
 

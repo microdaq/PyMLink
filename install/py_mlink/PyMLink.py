@@ -467,17 +467,25 @@ class MLink:
         self._raise_exception(res)
 
     @_connect_decorate
-    def enc_init(self, encoder, init_value):
+    def enc_init(self, encoder, mode, init_value):
         """
         Description:
             Initializes encoder module
         Usage:
             enc_init(encoder, init_value)
             encoder - encoder module (1 or 2)
+            mode - mode - encoder counter mode 
+                0 - quadrature - ENCxA and ENCxB inputs are used for A and B channels
+                1 - dir - ENCxA input will provide the clock for position counter and the ENCxB 
+                          input will have the direction information. The position counteris 
+                          incremented on every rising edge of ENCxA input when the direction 
+                          input is high and decremented when the direction input is low.
+                2 - up - position counter is incremented on both edges of the ENCxA input.
+                3 - down - position counter is decremented on both edges of the ENCxA input.
             init_value - initial encoder value
         """
 
-        res = cml.mlink_enc_init(ctypes.pointer(self._linkfd), encoder, init_value)
+        res = cml.mlink_enc_init(ctypes.pointer(self._linkfd), encoder, mode, init_value)
         self._raise_exception(res)
 
     @_connect_decorate
@@ -722,22 +730,10 @@ class MLink:
         for channel in range(0, len(self._ai_scan_channels)):
             val_list.append([channels_val[i+channel] for i in range(0, scan_count, len(self._ai_scan_channels))])
 
-        return val_list
-
-    @_connect_decorate
-    def ai_scan_sync(self, dio, edge):
-        """
-        Description:
-            Synchronizes analog input conversion with digital input
-        Usage:
-            ai_scan_sync(dio, edge)
-            dio - digital input line (1..8)
-            edge - type of digital signal edge which triggers ADC conversion 
-                   1 - falling edge, 2 - rising edge, 3 - falling or rising edge 
-        """
-
-        res = cml.mlink_ai_scan_sync(ctypes.pointer(self._linkfd), dio, edge)
-        self._raise_exception(res)
+        if len(val_list) == 1:
+            return val_list[0]
+        else:
+            return val_list
 
     @_connect_decorate
     def ao_write(self, channels, ao_range, data):
