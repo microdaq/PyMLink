@@ -6,7 +6,7 @@ import platform
 import os
 import sys
 import shutil
-from distutils.core import setup
+from setuptools import setup
 
 
 def invalid_python_version():
@@ -107,13 +107,3 @@ setup(
         ]
     }
 )
-
-try:
-    print('Removing ', os.path.abspath('build'))
-    shutil.rmtree('build')
-    print('...done.')
-    sys.exit(0)
-
-except OSError:
-    print('...failed.')
-    sys.exit(1)
