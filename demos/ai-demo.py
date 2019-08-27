@@ -1,6 +1,6 @@
 # Analog input demo
 # visit site www.microdaq.org
-# Embedded-solutions, November 2017
+# Embedded-solutions, November 2017-2019
 
 from py_mlink import PyMLink
 
@@ -12,7 +12,7 @@ data = mdaq.ai_read([1, 2, 3, 4], [-10, 10], False)
 
 # Print data
 for i, volt in enumerate(data):
-    print 'Channel[%d]: %f V' % (i, volt)
+    print('Channel[%d]: %f V' % (i, volt))
 
 
 

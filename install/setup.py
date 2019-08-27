@@ -1,73 +1,109 @@
 # PyMLink installation script
 # visit site www.microdaq.org
-# Embedded-solutions, November 2017
+# Embedded-solutions, November 2017-2019
 
-from distutils.core import setup
 import platform
-import urllib2
 import os
 import sys
 import shutil
+from setuptools import setup
 
-# check python version
-if sys.version_info.major != 2 and sys.version_info.minor != 7:
-    print 'Run this script with Python2.7!'
+
+def invalid_python_version():
+    return sys.version_info[0] == 2 and sys.version_info[1] < 6
+
+
+if invalid_python_version():
+    print('Python2.6 and above are supported!')
     sys.exit(1)
+
 
 PYMLINK_VERSION = 'py_mlink'
 os_name = platform.system()
-lib_ext = None
 
-# Check OS
-lib_prefix = ''
-if os_name == 'Windows':
-    lib_ext = '.dll'
-elif os_name == 'Linux':
-    lib_ext = '.so'
-    lib_prefix = 'lib'
-else:
-    print 'This operating system is not supported!'
-    exit
+pack_data = {}
+arch_dir = ''
+
+linux_lib_name = 'libmlink.so'
+linux_lib_path = '/usr/lib/'
+
+darwin_lib_name = 'libmlink.dylib'
+darwin_lib_path = '/usr/local/lib/'
 
 # Check python platform version
 if platform.architecture()[0] == '32bit':
-    lib_ver = 'MLink32'
+    win_lib_name = 'MLink32.dll'
+    arch_dir = 'x86/'
 elif platform.architecture()[0] == '64bit':
-    lib_ver = 'MLink64'
+    win_lib_name = 'MLink64.dll'
+    arch_dir = 'x64/'
 else:
-    print 'This platform is not supported!'
+    print('Your platform is not supported!')
     sys.exit()
 
-mlink_lib = lib_ver+lib_ext
-pack_data = {PYMLINK_VERSION: [mlink_lib]}
+# Check OS
+if os_name == 'Windows':
+    pack_data = {PYMLINK_VERSION: [win_lib_name]}
+    shutil.copy(
+        os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+win_lib_name),
+        os.path.normpath(PYMLINK_VERSION+'/'+win_lib_name))
 
-# if linux then copy lib to standard location
-if os_name == 'Linux':
-    pack_data = {}
-    linux_lib_path = '/usr/lib/'
+elif os_name == 'Linux':
+    # in case of arm processors take another binary
+    if platform.uname()[4].startswith('arm'):
+       arch_dir = 'armel/'
+    
+    # copy lib to standard linux location
     try:
-        print 'copying file '+PYMLINK_VERSION+'/'+mlink_lib+' to '+linux_lib_path
-        shutil.copy(os.path.normpath(PYMLINK_VERSION+'/'+mlink_lib), os.path.normpath(linux_lib_path+'lib'+mlink_lib))
-    except:
-        print '...failed.'
-        sys.exit()
+        print(
+            'copying file '+PYMLINK_VERSION+'/'
+            + arch_dir + linux_lib_name+' to '
+            + linux_lib_path)
+        shutil.copy(
+            os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+linux_lib_name),
+            os.path.normpath(linux_lib_path+linux_lib_name)
+        )
+    except OSError:
+        print('...failed. - try to run setup script with root privileges')
+        sys.exit(1)
 
-tmp_dir = ''
-setup(name='PyMLink',
-      version='1.1.1',
-      author='Lukas Wit',
-      author_email='lukas.w@embedded-solutions.pl',
-      url='www.microdaq.org',
-      description='Python2.7 binding of MLink library.',
-      license='BSD',
-      packages = [PYMLINK_VERSION],
-      package_dir = {PYMLINK_VERSION: PYMLINK_VERSION},
-      package_data = pack_data,
-      )
+elif os_name == 'Darwin':
+    # copy lib to standard macos location
+    try:
+        if not os.path.exists(darwin_lib_path):
+            os.makedirs(darwin_lib_path)
 
-try:
-    print 'Removing ', os.path.abspath('build')
-    shutil.rmtree('build')
-    print '...done.'
-except:
-    print '...failed.'
+        print(
+            'copying file '+PYMLINK_VERSION
+            + '/'+arch_dir+darwin_lib_name
+            + ' to '+darwin_lib_path
+        )
+        shutil.copy(
+            os.path.normpath(PYMLINK_VERSION+'/'+arch_dir+darwin_lib_name),
+            os.path.normpath(darwin_lib_path+darwin_lib_name))
+    except OSError:
+        print('...failed. - try to run setup script with root privileges')
+        sys.exit(1)
+else:
+    print('Your operating system is not supported!')
+    sys.exit(1)
+
+setup(
+    name='PyMLink',
+    version='1.3.0',
+    author='Lukas Wit',
+    author_email='lukas.w@embedded-solutions.pl',
+    url='www.microdaq.org',
+    description='Python 2.6 and above binding of MLink library.',
+    license='BSD',
+    packages=[PYMLINK_VERSION],
+    package_dir={PYMLINK_VERSION: PYMLINK_VERSION},
+    package_data=pack_data,
+    extras_require={
+        'demos':[
+            'numpy',
+            'pyqt5',
+            'pyqtgraph'
+        ]
+    }
+)

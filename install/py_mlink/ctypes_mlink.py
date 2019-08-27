@@ -1,6 +1,6 @@
-'''
-Do not modify this file. Auto generated.
-'''
+# MLink Python 3 binding
+# visit site www.microdaq.org
+# Embedded-solutions, November 2017-2019
 
 __docformat__ =  'restructuredtext'
 
@@ -47,7 +47,7 @@ def POINTER(obj):
 
 class UserString:
     def __init__(self, seq):
-        if isinstance(seq, basestring):
+        if isinstance(seq, str):
             self.data = seq
         elif isinstance(seq, UserString):
             self.data = seq.data[:]
@@ -56,7 +56,7 @@ class UserString:
     def __str__(self): return str(self.data)
     def __repr__(self): return repr(self.data)
     def __int__(self): return int(self.data)
-    def __long__(self): return long(self.data)
+    def __long__(self): return int(self.data)
     def __float__(self): return float(self.data)
     def __complex__(self): return complex(self.data)
     def __hash__(self): return hash(self.data)
@@ -78,12 +78,12 @@ class UserString:
     def __add__(self, other):
         if isinstance(other, UserString):
             return self.__class__(self.data + other.data)
-        elif isinstance(other, basestring):
+        elif isinstance(other, str):
             return self.__class__(self.data + other)
         else:
             return self.__class__(self.data + str(other))
     def __radd__(self, other):
-        if isinstance(other, basestring):
+        if isinstance(other, str):
             return self.__class__(other + self.data)
         else:
             return self.__class__(str(other) + self.data)
@@ -97,7 +97,7 @@ class UserString:
     def capitalize(self): return self.__class__(self.data.capitalize())
     def center(self, width, *args):
         return self.__class__(self.data.center(width, *args))
-    def count(self, sub, start=0, end=sys.maxint):
+    def count(self, sub, start=0, end=sys.maxsize):
         return self.data.count(sub, start, end)
     def decode(self, encoding=None, errors=None): # XXX improve this?
         if encoding:
@@ -115,20 +115,19 @@ class UserString:
                 return self.__class__(self.data.encode(encoding))
         else:
             return self.__class__(self.data.encode())
-    def endswith(self, suffix, start=0, end=sys.maxint):
+    def endswith(self, suffix, start=0, end=sys.maxsize):
         return self.data.endswith(suffix, start, end)
     def expandtabs(self, tabsize=8):
         return self.__class__(self.data.expandtabs(tabsize))
-    def find(self, sub, start=0, end=sys.maxint):
+    def find(self, sub, start=0, end=sys.maxsize):
         return self.data.find(sub, start, end)
-    def index(self, sub, start=0, end=sys.maxint):
+    def index(self, sub, start=0, end=sys.maxsize):
         return self.data.index(sub, start, end)
     def isalpha(self): return self.data.isalpha()
     def isalnum(self): return self.data.isalnum()
     def isdecimal(self): return self.data.isdecimal()
     def isdigit(self): return self.data.isdigit()
     def islower(self): return self.data.islower()
-    def isnumeric(self): return self.data.isnumeric()
     def isspace(self): return self.data.isspace()
     def istitle(self): return self.data.istitle()
     def isupper(self): return self.data.isupper()
@@ -141,9 +140,9 @@ class UserString:
         return self.data.partition(sep)
     def replace(self, old, new, maxsplit=-1):
         return self.__class__(self.data.replace(old, new, maxsplit))
-    def rfind(self, sub, start=0, end=sys.maxint):
+    def rfind(self, sub, start=0, end=sys.maxsize):
         return self.data.rfind(sub, start, end)
-    def rindex(self, sub, start=0, end=sys.maxint):
+    def rindex(self, sub, start=0, end=sys.maxsize):
         return self.data.rindex(sub, start, end)
     def rjust(self, width, *args):
         return self.__class__(self.data.rjust(width, *args))
@@ -155,7 +154,7 @@ class UserString:
     def rsplit(self, sep=None, maxsplit=-1):
         return self.data.rsplit(sep, maxsplit)
     def splitlines(self, keepends=0): return self.data.splitlines(keepends)
-    def startswith(self, prefix, start=0, end=sys.maxint):
+    def startswith(self, prefix, start=0, end=sys.maxsize):
         return self.data.startswith(prefix, start, end)
     def strip(self, chars=None): return self.__class__(self.data.strip(chars))
     def swapcase(self): return self.__class__(self.data.swapcase())
@@ -198,10 +197,10 @@ class MutableString(UserString):
         start = max(start, 0); end = max(end, 0)
         if isinstance(sub, UserString):
             self.data = self.data[:start]+sub.data+self.data[end:]
-        elif isinstance(sub, basestring):
+        elif isinstance(sub, str):
             self.data = self.data[:start]+sub+self.data[end:]
         else:
-            self.data =  self.data[:start]+str(sub)+self.data[end:]
+            self.data =    self.data[:start]+str(sub)+self.data[end:]
     def __delslice__(self, start, end):
         start = max(start, 0); end = max(end, 0)
         self.data = self.data[:start] + self.data[end:]
@@ -210,7 +209,7 @@ class MutableString(UserString):
     def __iadd__(self, other):
         if isinstance(other, UserString):
             self.data += other.data
-        elif isinstance(other, basestring):
+        elif isinstance(other, str):
             self.data += other
         else:
             self.data += str(other)
@@ -225,7 +224,7 @@ class String(MutableString, Union):
                 ('data', c_char_p)]
 
     def __init__(self, obj=""):
-        if isinstance(obj, (str, unicode, UserString)):
+        if isinstance(obj, (str, UserString)):
             self.data = str(obj)
         else:
             self.raw = obj
@@ -375,7 +374,7 @@ class LibraryLoader(object):
                 return ctypes.CDLL(path, ctypes.RTLD_GLOBAL)
             else:
                 return ctypes.cdll.LoadLibrary(path)
-        except OSError,e:
+        except OSError as e:
             raise ImportError(e)
 
     def getpaths(self,libname):
@@ -585,16 +584,17 @@ del loaderclass
 add_library_search_dirs([])
 
 # Begin libraries
-if platform.architecture()[0] == '32bit':
-        libname_ver = 'MLink32'
-elif platform.architecture()[0] == '64bit':
-        libname_ver = 'MLink64'
-else:
-        libname_ver = 'MLink'+platform.architecture()[0]
 
 libpath = ''
 if platform.system() == 'Windows':
     libpath = os.path.dirname(inspect.getfile(py_mlink))+'/'
+    if platform.architecture()[0] == '32bit':
+        libname_ver = 'MLink32'
+    elif platform.architecture()[0] == '64bit':
+        libname_ver = 'MLink64'
+
+if platform.system() == 'Linux' or platform.system() == 'Darwin':
+    libname_ver = 'mlink'
 
 libname_ver = libpath+libname_ver
 _libs["MLink"] = load_library(libname_ver)
@@ -606,7 +606,7 @@ _libs["MLink"] = load_library(libname_ver)
 # No modules
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 36
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_error'):
         continue
     mlink_error = _lib.mlink_error
@@ -619,7 +619,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 37
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_fw_version'):
         continue
     mlink_fw_version = _lib.mlink_fw_version
@@ -627,7 +627,7 @@ for _lib in _libs.itervalues():
     mlink_fw_version.restype = c_int
     break
 
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_lib_version'):
         continue
     mlink_lib_version = _lib.mlink_lib_version
@@ -636,7 +636,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 38
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_hwid'):
         continue
     mlink_hwid = _lib.mlink_hwid
@@ -645,16 +645,16 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 40
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_connect'):
         continue
     mlink_connect = _lib.mlink_connect
-    mlink_connect.argtypes = [String, c_uint16, POINTER(c_int)]
+    mlink_connect.argtypes = [c_char_p, c_uint16, POINTER(c_int)]
     mlink_connect.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 41
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_disconnect'):
         continue
     mlink_disconnect = _lib.mlink_disconnect
@@ -663,42 +663,62 @@ for _lib in _libs.itervalues():
 
     break
 
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_disconnect_all'):
         continue
     mlink_disconnect_all = _lib.mlink_disconnect_all
     mlink_disconnect_all.restype = c_void
     break
 
-for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_run'):
+#EXTERNC MDAQ_API int mlink_dsp_init(int *link_fd, char *dsp_binary_path, double rate, double duration);
+
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_dsp_init'):
         continue
-    mlink_dsp_load = _lib.mlink_dsp_load
-    mlink_dsp_load.argtypes = [POINTER(c_int), String, String]
-    mlink_dsp_load.restype = c_int
+    mlink_dsp_init = _lib.mlink_dsp_init
+    mlink_dsp_init.argtypes = [POINTER(c_int), c_char_p, c_double, c_double]
+    mlink_dsp_init.restype = c_int
     break
 
-
-#EXTERNC MDAQ_API int mlink_dsp_run(int *link_fd,  const char *dsp_binary_path, double period);
-for _lib in _libs.itervalues():
-    if not hasattr(_lib, 'mlink_dsp_run'):
+#EXTERNC MDAQ_API int mlink_dsp_start(int *link_fd);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_dsp_start'):
         continue
-    mlink_dsp_run = _lib.mlink_dsp_run
-    mlink_dsp_run.argtypes = [POINTER(c_int), String, c_double]
-    mlink_dsp_run.restype = c_int
+    mlink_dsp_start = _lib.mlink_dsp_start
+    mlink_dsp_start.argtypes = [POINTER(c_int)]
+    mlink_dsp_start.restype = c_int
     break
 
-#EXTERNC MDAQ_API int mlink_dsp_signal_read(int signal_id, int signal_size, double *data, int data_size, int timeout);
-for _lib in _libs.itervalues():
+#EXTERNC MDAQ_API int mlink_dsp_is_done(int *link_fd);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_dsp_is_done'):
+        continue
+    mlink_dsp_is_done = _lib.mlink_dsp_is_done
+    mlink_dsp_is_done.argtypes = [POINTER(c_int)]
+    mlink_dsp_is_done.restype = c_int
+    break
+
+#EXTERNC mlink_dsp_wait_until_done(int *link_fd, int timeout);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_dsp_wait_until_done'):
+        continue
+    mlink_dsp_wait_until_done = _lib.mlink_dsp_wait_until_done
+    mlink_dsp_wait_until_done.argtypes = [POINTER(c_int), c_int]
+    mlink_dsp_wait_until_done.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_dsp_signal_read(int *link_fd, int signal_id, int signal_size, double *data, int data_size, int timeout);
+
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dsp_signal_read'):
         continue
     mlink_dsp_signal_read = _lib.mlink_dsp_signal_read
-    mlink_dsp_signal_read.argtypes = [c_int, c_int, POINTER(c_double), c_int, c_int]
+    mlink_dsp_signal_read.argtypes = [POINTER(c_int), c_int, c_int, POINTER(c_double), c_int, c_int]
     mlink_dsp_signal_read.restype = c_int
     break
 
 #EXTERNC MDAQ_API int mlink_dsp_mem_write(int *link_fd, int start_idx, int len, float *data);
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dsp_mem_write'):
         continue
     mlink_dsp_mem_write = _lib.mlink_dsp_mem_write
@@ -707,7 +727,7 @@ for _lib in _libs.itervalues():
     break
 
 #EXTERNC MDAQ_API int mlink_dsp_stop(int *link_fd );
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dsp_stop'):
         continue
     mlink_dsp_stop = _lib.mlink_dsp_stop
@@ -716,7 +736,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 50
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_set_func'):
         continue
     mlink_dio_set_func = _lib.mlink_dio_set_func
@@ -725,7 +745,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 51
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_set_dir'):
         continue
     mlink_dio_set_dir = _lib.mlink_dio_set_dir
@@ -734,7 +754,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 52
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_write'):
         continue
     mlink_dio_write = _lib.mlink_dio_write
@@ -743,7 +763,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 53
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_read'):
         continue
     mlink_dio_read = _lib.mlink_dio_read
@@ -752,7 +772,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 54
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_led_write'):
         continue
     mlink_led_write = _lib.mlink_led_write
@@ -761,7 +781,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 55
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_func_read'):
         continue
     mlink_func_read = _lib.mlink_func_read
@@ -770,7 +790,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 58
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_enc_read'):
         continue
     mlink_enc_read = _lib.mlink_enc_read
@@ -779,16 +799,16 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 59
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_enc_init'):
         continue
     mlink_enc_init = _lib.mlink_enc_init
-    mlink_enc_init.argtypes = [POINTER(c_int), c_uint8, c_int32]
+    mlink_enc_init.argtypes = [POINTER(c_int), c_uint8, c_uint8, c_int32]
     mlink_enc_init.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 62
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pwm_init'):
         continue
     mlink_pwm_init = _lib.mlink_pwm_init
@@ -797,7 +817,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 63
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pwm_write'):
         continue
     mlink_pwm_write = _lib.mlink_pwm_write
@@ -806,16 +826,16 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 66
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_exec'):
         continue
     mlink_pru_exec = _lib.mlink_pru_exec
-    mlink_pru_exec.argtypes = [POINTER(c_int), String, c_uint8, c_uint8]
+    mlink_pru_exec.argtypes = [POINTER(c_int), c_char_p, c_uint8, c_uint8]
     mlink_pru_exec.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 67
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_stop'):
         continue
     mlink_pru_stop = _lib.mlink_pru_stop
@@ -824,7 +844,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 68
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_reg_get'):
         continue
     mlink_pru_reg_get = _lib.mlink_pru_reg_get
@@ -833,7 +853,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 69
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_reg_set'):
         continue
     mlink_pru_reg_set = _lib.mlink_pru_reg_set
@@ -842,7 +862,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 72
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_uart_config'):
         continue
     mlink_uart_config = _lib.mlink_uart_config
@@ -851,25 +871,25 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 73
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_uart_read'):
         continue
     mlink_uart_read = _lib.mlink_uart_read
-    mlink_uart_read.argtypes = [POINTER(c_int), c_uint8, String, c_uint32, c_int32]
+    mlink_uart_read.argtypes = [POINTER(c_int), c_uint8, c_char_p, c_uint32, c_int32]
     mlink_uart_read.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 74
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_uart_write'):
         continue
     mlink_uart_write = _lib.mlink_uart_write
-    mlink_uart_write.argtypes = [POINTER(c_int), c_uint8, String, c_uint32]
+    mlink_uart_write.argtypes = [POINTER(c_int), c_uint8, c_char_p, c_uint32]
     mlink_uart_write.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 75
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_uart_close'):
         continue
     mlink_uart_close = _lib.mlink_uart_close
@@ -878,7 +898,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 78
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_hs_ai_init'):
         continue
     mlink_hs_ai_init = _lib.mlink_hs_ai_init
@@ -887,7 +907,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 79
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_hs_ai_read'):
         continue
     mlink_hs_ai_read = _lib.mlink_hs_ai_read
@@ -896,7 +916,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 82
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ai_read'):
         continue
     mlink_ai_read = _lib.mlink_ai_read
@@ -907,7 +927,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 83
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ao_write'):
         continue
     mlink_ao_write = _lib.mlink_ao_write
@@ -917,7 +937,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 84
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ao_ch_config'):
         continue
     mlink_ao_ch_config = _lib.mlink_ao_ch_config
@@ -926,7 +946,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 86
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ai_scan_init'):
         continue
     mlink_ai_scan_init = _lib.mlink_ai_scan_init
@@ -937,16 +957,16 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 87
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ai_scan'):
         continue
     mlink_ai_scan = _lib.mlink_ai_scan
-    mlink_ai_scan.argtypes = [POINTER(c_double), c_uint32, c_int32]
+    mlink_ai_scan.argtypes = [POINTER(c_int), POINTER(c_double), c_uint32, c_int32]
     mlink_ai_scan.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 88
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ai_scan_stop'):
         continue
     mlink_ai_scan_stop = _lib.mlink_ai_scan_stop
@@ -954,8 +974,16 @@ for _lib in _libs.itervalues():
     mlink_ai_scan_stop.restype = c_int
     break
 
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_ai_scan_sync'):
+        continue
+    mlink_ai_scan_sync = _lib.mlink_ai_scan_sync
+    mlink_ai_scan_sync.argtypes = [POINTER(c_int), c_uint8, c_int8]
+    mlink_ai_scan_sync.restype = c_int
+    break
+
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 90
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_mem_set'):
         continue
     mlink_pru_mem_set = _lib.mlink_pru_mem_set
@@ -964,7 +992,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 91
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_pru_mem_get'):
         continue
     mlink_pru_mem_get = _lib.mlink_pru_mem_get
@@ -973,34 +1001,34 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 92
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_get_obj_size'):
         continue
     mlink_get_obj_size = _lib.mlink_get_obj_size
-    mlink_get_obj_size.argtypes = [POINTER(c_int), String, POINTER(c_uint32)]
+    mlink_get_obj_size.argtypes = [POINTER(c_int), c_char_p, POINTER(c_uint32)]
     mlink_get_obj_size.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 93
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_get_obj'):
         continue
     mlink_get_obj = _lib.mlink_get_obj
-    mlink_get_obj.argtypes = [POINTER(c_int), String, POINTER(None), c_uint32]
+    mlink_get_obj.argtypes = [POINTER(c_int), c_char_p, POINTER(None), c_uint32]
     mlink_get_obj.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 94
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_set_obj'):
         continue
     mlink_set_obj = _lib.mlink_set_obj
-    mlink_set_obj.argtypes = [POINTER(c_int), String, POINTER(None), c_uint32]
+    mlink_set_obj.argtypes = [POINTER(c_int), c_char_p, POINTER(None), c_uint32]
     mlink_set_obj.restype = c_int
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 95
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_mem_open'):
         continue
     mlink_mem_open = _lib.mlink_mem_open
@@ -1009,7 +1037,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 96
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_mem_close'):
         continue
     mlink_mem_close = _lib.mlink_mem_close
@@ -1018,7 +1046,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 97
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_mem_set'):
         continue
     mlink_mem_set = _lib.mlink_mem_set
@@ -1027,7 +1055,7 @@ for _lib in _libs.itervalues():
     break
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 98
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_mem_get'):
         continue
     mlink_mem_get = _lib.mlink_mem_get
@@ -1035,7 +1063,7 @@ for _lib in _libs.itervalues():
     mlink_mem_get.restype = c_int
     break
 
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ao_scan_init'):
         continue
     # mlink_ao_scan_init(int *link_fd, uint8_t *ch, uint8_t ch_count, float *data, int data_size, double *range,
@@ -1046,7 +1074,25 @@ for _lib in _libs.itervalues():
     mlink_ao_scan_init.restype = c_int
     break
 
-for _lib in _libs.itervalues():
+#EXTERNC MDAQ_API int mlink_ao_scan_is_done(int *link_fd);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_ao_scan_is_done'):
+        continue
+    mlink_ao_scan_is_done = _lib.mlink_ao_scan_is_done
+    mlink_ao_scan_is_done.argtypes = [POINTER(c_int)]
+    mlink_ao_scan_is_done.restype = c_int
+    break
+
+#EXTERNC MDAQ_API int mlink_ao_scan_wait_until_done(int *link_fd, int timeout);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_ao_scan_wait_until_done'):
+        continue
+    mlink_ao_scan_wait_until_done = _lib.mlink_ao_scan_wait_until_done
+    mlink_ao_scan_wait_until_done.argtypes = [POINTER(c_int), c_int]
+    mlink_ao_scan_wait_until_done.restype = c_int
+    break
+
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ao_scan_data'):
         continue
     mlink_ao_scan_data = _lib.mlink_ao_scan_data
@@ -1055,7 +1101,7 @@ for _lib in _libs.itervalues():
     mlink_ao_scan_data.restype = c_int
     break
 
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ao_scan'):
         continue
     mlink_ao_scan = _lib.mlink_ao_scan
@@ -1063,7 +1109,7 @@ for _lib in _libs.itervalues():
     mlink_ao_scan.restype = c_int
     break
 
-for _lib in _libs.itervalues():
+for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_ao_scan_stop'):
         continue
     mlink_ao_scan_stop = _lib.mlink_ao_scan_stop
@@ -1071,7 +1117,52 @@ for _lib in _libs.itervalues():
     mlink_ao_scan_stop.restype = c_int
     break
 
+#int mlink_scan_trigger_clear(int *link_fd, uint8_t trigger); 
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_scan_trigger_clear'):
+        continue
+    mlink_scan_trigger_clear = _lib.mlink_scan_trigger_clear
+    mlink_scan_trigger_clear.argtypes = [POINTER(c_int), c_uint8]
+    mlink_scan_trigger_clear.restype = c_int
+    break
+
+#int mlink_scan_trigger_dio(int *link_fd, uint8_t trigger, uint8_t dio, uint8_t level);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_scan_trigger_dio'):
+        continue
+    mlink_scan_trigger_dio = _lib.mlink_scan_trigger_dio
+    mlink_scan_trigger_dio.argtypes = [POINTER(c_int), c_uint8, c_uint8, c_uint8]
+    mlink_scan_trigger_dio.restype = c_int
+    break
+
+#int mlink_scan_trigger_dio_pattern(int *link_fd, uint8_t trigger,  char *pattern, int len);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_scan_trigger_dio_pattern'):
+        continue
+    mlink_scan_trigger_dio_pattern = _lib.mlink_scan_trigger_dio_pattern
+    mlink_scan_trigger_dio_pattern.argtypes = [POINTER(c_int), c_uint8, POINTER(c_char), c_uint8]
+    mlink_scan_trigger_dio_pattern.restype = c_int
+    break
+
+#int mlink_scan_trigger_encoder(int *link_fd, uint8_t trigger, uint8_t module, int32_t position, uint8_t slope);
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_scan_trigger_encoder'):
+        continue
+    mlink_scan_trigger_encoder = _lib.mlink_scan_trigger_encoder
+    mlink_scan_trigger_encoder.argtypes = [POINTER(c_int), c_uint8, c_uint8, c_int32, c_uint8]
+    mlink_scan_trigger_encoder.restype = c_int
+    break
+
+#int mlink_scan_trigger_external_start(int *link_fd, uint8_t trigger, uint8_t src); 
+for _lib in _libs.values():
+    if not hasattr(_lib, 'mlink_scan_trigger_external_start'):
+        continue
+    mlink_scan_trigger_external_start = _lib.mlink_scan_trigger_external_start
+    mlink_scan_trigger_external_start.argtypes = [POINTER(c_int), c_uint8, c_uint8]
+    mlink_scan_trigger_external_start.restype = c_int
+    break
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 15
+
 try:
     AO_0_TO_5V = 0
 except:
