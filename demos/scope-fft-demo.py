@@ -7,9 +7,6 @@ import pyqtgraph as pg
 
 from py_mlink import PyMLink
 
-# to suppress "Qpicture: invalid format version 0" warning
-pg.QtCore.qInstallMsgHandler(lambda *args: None)
-
 # Params
 DATA_COUNT = 10000
 SAMPLE_RATE_HZ = 100000
@@ -44,15 +41,16 @@ mdaq.ai_scan_init(
 
 print('Acquiring data...')
 for i in range(int((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT)):
+
     # Get AI data
     data = mdaq.ai_scan(DATA_COUNT, -1)
 
     # Calc FFT and draw plots
     data = data - np.mean(data)
-    y = np.array(abs(np.fft.fft(data[0])/DATA_COUNT))
-    y = y[0:(DATA_COUNT/2)]*2.0
+    y = np.array(abs(np.fft.fft(data)/DATA_COUNT))
+    y = y[0:int(DATA_COUNT/2)]*2.0
     p_fft_handle.setData(xf, y)
-    p_data_handle.setData(xd, data[0])
+    p_data_handle.setData(xd, data)
 
     pg.QtGui.QApplication.processEvents()
 
