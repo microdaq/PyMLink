@@ -466,7 +466,7 @@ class MLink:
         self._raise_exception(res)
 
     @_connect_decorate
-    def enc_init(self, encoder, mode, init_value):
+    def enc_init(self, encoder, mode=0, init_value=0):
         """
         Description:
             Initializes encoder module
