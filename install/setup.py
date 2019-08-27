@@ -17,7 +17,6 @@ if invalid_python_version():
     print('Python2.6 and above are supported!')
     sys.exit(1)
 
-
 PYMLINK_VERSION = 'py_mlink'
 os_name = platform.system()
 
@@ -29,6 +28,13 @@ linux_lib_path = '/usr/lib/'
 
 darwin_lib_name = 'libmlink.dylib'
 darwin_lib_path = '/usr/local/lib/'
+demos_dependencies = []
+
+if sys.version_info[0] == 2:
+     demos_dependencies = ["matplotlib"]
+
+if sys.version_info[0] == 3:
+     demos_dependencies = ["numpy", "matplotlib", "pyqt5", "pyqtgraph"]
 
 # Check python platform version
 if platform.architecture()[0] == '32bit':
@@ -92,18 +98,12 @@ setup(
     name='PyMLink',
     version='1.3.0',
     author='Lukas Wit',
-    author_email='lukas.w@embedded-solutions.pl',
+    author_email='support@embedded-solutions.pl',
     url='www.microdaq.org',
     description='Python 2.6 and above binding of MLink library.',
     license='BSD',
     packages=[PYMLINK_VERSION],
     package_dir={PYMLINK_VERSION: PYMLINK_VERSION},
     package_data=pack_data,
-    extras_require={
-        'demos':[
-            'numpy',
-            'pyqt5',
-            'pyqtgraph'
-        ]
-    }
+    extras_require={'demos': demos_dependencies}
 )
