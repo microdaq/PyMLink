@@ -204,15 +204,27 @@ class MLink:
 
         return major.value, minor.value, fix.value, build.value
 
-    def hw_info(self):
+    def get_str_hw_info(self):
         """
         Description:
-            Prints model of a connected MicroDAQ device
+            Returns string with model of a connected MicroDAQ device
+            example output: 'MicroDAQ E2000-ADC09-DAC06-12'
         Usage:
-            hw_info()
+            model = get_str_hw_info()
+            
          """
 
-        print('MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid))
+        return 'MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
+
+    def get_hw_info(self):
+        """
+        Description:
+            Returns tuple with model description of a connected MicroDAQ device
+        Usage:
+            (serie, adc, dac, cpu, mem) = get_hw_info()
+         """
+
+        return tuple(self._mdaq_hwid)
 
     @_connect_decorate
     def dsp_init(self, dsp_application, rate, duration):
