@@ -14,6 +14,7 @@ def pytest_addoption(parser):
     usage example:
     pytest tests.py --ip=192.168.1.2 --tolerance=0.1 --mock
     """
+
     parser.addoption(
         "--ip",
         action="store",
@@ -54,14 +55,9 @@ def tolerance(request):
 def hwid(mdaq):
     return mdaq.get_str_hw_info() 
 
-
-@pytest.fixture(autouse=True)
-def skip_hwid(request, hwid):
-    print(hwid)
-    if request.node.get_closest_marker('skip_hwid'):
-        if request.node.get_closest_marker('skip_hwid').args[0] == hwid:
-            pytest.skip(
-                'Test is not designed for given MicroDAQ configuration: {}'.format(hwid))   
+@pytest.fixture
+def hwid_tuple(mdaq):
+    return mdaq.get_hw_info() 
 
 
 @pytest.fixture
@@ -90,8 +86,31 @@ def mdaq_cls():
         return pml
 
 
+@pytest.fixture(autouse=True)
+def skipif_hwid(request, hwid):
+    marker = request.node.get_closest_marker('skipif_hwid')
+    if marker and marker.args[0] == hwid:
+        pytest.skip(
+            f'Test is not designed for given MicroDAQ configuration: {hwid}')
+
+
+@pytest.fixture(autouse=True)
+def skipif_adc(request, hwid_tuple):
+    marker = request.node.get_closest_marker('skipif_adc')
+
+    _, adc, _, _, _ = hwid_tuple    
+    if marker and adc in marker.args[0]:
+        pytest.skip(
+            f'Test is not designed for given MicroDAQ ADC: {adc}')
+
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", 
-        "skip_hwid(hwid): Marker for skipping test for specified MicroDAQs hardware ID"
+        "skipif_hwid(hwid): Marker for skipping test for specified MicroDAQs hardware ID"
+    )
+
+    config.addinivalue_line(
+        "markers", 
+        "skipif_adc(adc_list): Marker for skipping test for specified MicroDAQs ADCs"
     )
