@@ -53,16 +53,52 @@ def tolerance(request):
 
 @pytest.fixture
 def hwid(mdaq):
+    """Returns MicroDAQ hardware configuration in a string format.
+    example:
+    'MicroDAQ E2000-ADC09-DAC06-12'
+    """
+
     return mdaq.get_str_hw_info() 
+
 
 @pytest.fixture
 def hwid_tuple(mdaq):
+    """Returns tuple with MicroDAQ hardware configuration.
+
+    :return: (serie, adc, dac, cpu, mem)
+    """
+
     return mdaq.get_hw_info() 
 
 
 @pytest.fixture
+def adc_id(hwid_tuple):
+    """Returns ID of Analog to Digital Converter 
+    from MicroDAQ configuration.
+    """
+
+    return hwid_tuple[1]
+
+
+@pytest.fixture
+def dac_id(hwid_tuple):
+    """Returns ID of Digital to Analog Converter 
+    from MicroDAQ configuration.
+    """
+
+    return hwid_tuple[2]
+
+
+@pytest.fixture
+def dio_count(adc_id, dac_id):
+    """Returns count of available digital I/O."""
+    count = 32 if adc_id == 1 and dac_id == 1 else 16
+    return count
+
+
+@pytest.fixture
 def mdaq(ip, request, mock):
-    """Resturns MLink class instance with established connection.
+    """Returns MLink class instance with established connection.
     """
 
     if mock:
@@ -95,13 +131,11 @@ def skipif_hwid(request, hwid):
 
 
 @pytest.fixture(autouse=True)
-def skipif_adc(request, hwid_tuple):
+def skipif_adc(request, adc_id):
     marker = request.node.get_closest_marker('skipif_adc')
-
-    _, adc, _, _, _ = hwid_tuple    
-    if marker and adc in marker.args[0]:
+    if marker and adc_id in marker.args[0]:
         pytest.skip(
-            f'Test is not designed for given MicroDAQ ADC: {adc}')
+            f'Test is not designed for given MicroDAQ ADC {adc_id}')
 
 
 def pytest_configure(config):
