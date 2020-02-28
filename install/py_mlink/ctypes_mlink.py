@@ -758,7 +758,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_write'):
         continue
     mlink_dio_write = _lib.mlink_dio_write
-    mlink_dio_write.argtypes = [POINTER(c_int), c_uint8, c_uint8]
+    mlink_dio_write.argtypes = [POINTER(c_int), POINTER(c_uint8), POINTER(c_uint8), c_uint8]
     mlink_dio_write.restype = c_int
     break
 
@@ -767,7 +767,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_read'):
         continue
     mlink_dio_read = _lib.mlink_dio_read
-    mlink_dio_read.argtypes = [POINTER(c_int), c_uint8, POINTER(c_uint8)]
+    mlink_dio_read.argtypes = [POINTER(c_int), POINTER(c_uint8), POINTER(c_uint8), c_uint8]
     mlink_dio_read.restype = c_int
     break
 
