@@ -8,7 +8,7 @@ The package works with Windows x86/x64, Linux x86/x64, MacOS x64 and EABI ARM ma
 
 To install this package:<br />
 1. Open install directory.<br /> 
-2. Run `pip install .`. (if Linux/MacOS, admin privileges required)
+2. Run `pip install .` (if Linux/MacOS, admin privileges required)
 
 
 ## License
