@@ -10,6 +10,24 @@ To install this package:<br />
 1. Open install directory.<br /> 
 2. Run `pip install .` (if Linux/MacOS, admin privileges required)
 
+## Demos
+In order to run demo simply run a script:\
+`python demos/ai-demo.py`
+
+LED control example:
+
+    import time
+    from py_mlink import PyMLink
+
+    mdaq = PyMLink.MLink('10.10.1.1')  # connect to MDAQ
+    mdaq.led_write(1, True)            # Turn on LED 1
+    mdaq.led_write(2, True)            # Turn on LED 2
+    time.sleep(1.0)                    # Wait a second
+    mdaq.led_write(1, False)           # Turn off LED 1
+    mdaq.led_write(2, False)           # Turn off LED 2
+
+
+
 ## Tests 
 
 The `pytest` package is required in order to run tests.<br />
@@ -21,4 +39,4 @@ The `pytest` package is required in order to run tests.<br />
 
 ## License
 
-The BSD license. 
+The BSD license. For more information read _LICENSE_ file.  
