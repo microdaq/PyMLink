@@ -1,10 +1,10 @@
-# MLink Python 3 binding
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.txt', which is part of this source code package.
+# Embedded-solutions 2019-2020, www.microdaq.org
+
+"""Py2/3 Wrapper of the MLink C library"""
 
 __docformat__ =  'restructuredtext'
-
-# Begin preamble
 
 import ctypes, os, sys
 from ctypes import *
