@@ -1,6 +1,7 @@
-# Scope demo
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.txt', which is part of this source code package.
+# Embedded-solutions 2019-2020, www.microdaq.org
+
 
 import pyqtgraph as pg
 

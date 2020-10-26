@@ -1,6 +1,10 @@
 # MLink Python tests 
 # www.microdaq.org
 # Embedded-solutions 2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.txt', which is part of this source code package.
+# Embedded-solutions 2019-2020, www.microdaq.org
+
 
 import pytest
 
@@ -9,7 +13,7 @@ import py_mlink_mock as pml_mock
 
 
 def pytest_addoption(parser):
-    """Defines additional options for test execution
+    """Define additional options for test execution.
     
     usage example:
     pytest tests.py --ip=192.168.1.2 --tolerance=0.1 --mock
@@ -32,7 +36,8 @@ def pytest_addoption(parser):
     parser.addoption(
         "--mock",
         action="store_true",
-        help="Use mocked MLink class instance for running tests without MicroDAQ device",
+        help="Use mocked MLink class instance for running "
+             "tests without MicroDAQ device",
     )
 
 
@@ -53,7 +58,7 @@ def tolerance(request):
 
 @pytest.fixture
 def hwid(mdaq):
-    """Returns MicroDAQ hardware configuration in a string format.
+    """Return MicroDAQ hardware configuration in a string format.
     example:
     'MicroDAQ E2000-ADC09-DAC06-12'
     """
@@ -63,7 +68,7 @@ def hwid(mdaq):
 
 @pytest.fixture
 def hwid_tuple(mdaq):
-    """Returns tuple with MicroDAQ hardware configuration.
+    """Return tuple with MicroDAQ hardware configuration.
 
     :return: (serie, adc, dac, cpu, mem)
     """
@@ -73,8 +78,7 @@ def hwid_tuple(mdaq):
 
 @pytest.fixture
 def adc_id(hwid_tuple):
-    """Returns ID of Analog to Digital Converter 
-    from MicroDAQ configuration.
+    """Return ID of Analog to Digital Converter from MicroDAQ configuration.
     """
 
     return hwid_tuple[1]
@@ -82,8 +86,7 @@ def adc_id(hwid_tuple):
 
 @pytest.fixture
 def dac_id(hwid_tuple):
-    """Returns ID of Digital to Analog Converter 
-    from MicroDAQ configuration.
+    """Return ID of Digital to Analog Converter from MicroDAQ configuration.
     """
 
     return hwid_tuple[2]
@@ -91,14 +94,14 @@ def dac_id(hwid_tuple):
 
 @pytest.fixture
 def dio_count(adc_id, dac_id):
-    """Returns count of available digital I/O."""
+    """Return count of available digital I/O."""
     count = 32 if adc_id == 1 and dac_id == 1 else 16
     return count
 
 
 @pytest.fixture
-def mdaq(ip, request, mock):
-    """Returns MLink class instance with established connection.
+def mdaq(ip, mock):
+    """Return MLink class instance with established connection.
     """
 
     if mock:
@@ -112,8 +115,9 @@ def mdaq(ip, request, mock):
 
 @pytest.fixture
 def mdaq_cls():
-    """Returns MLink class or mocked MLink class.
-    Returned object depends on --mock paramter. 
+    """Return MLink class or mocked MLink class.
+
+    NOTE: Returned object depends on --mock parameter.
     """
 
     if mock:
@@ -141,10 +145,12 @@ def skipif_adc(request, adc_id):
 def pytest_configure(config):
     config.addinivalue_line(
         "markers", 
-        "skipif_hwid(hwid): Marker for skipping test for specified MicroDAQs hardware ID"
+        "skipif_hwid(hwid): Marker for skipping test for specified "
+        "MicroDAQs hardware ID"
     )
 
     config.addinivalue_line(
         "markers", 
-        "skipif_adc(adc_list): Marker for skipping test for specified MicroDAQs ADCs"
+        "skipif_adc(adc_list): Marker for skipping test for specified "
+        "MicroDAQs ADCs"
     )
