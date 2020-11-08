@@ -7,7 +7,7 @@ class MLinkError(Exception):
     pass
 
 
-class MLink:
+class Device:
     def __init__(self, ip):
         self._serie = 2000
         self._adc = 9
