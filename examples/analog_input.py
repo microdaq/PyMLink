@@ -1,11 +1,11 @@
-# Analog input demo
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
-from py_mlink import PyMLink
+import microdaq
 
 # Create MLink object, connect to MicroDAQ device
-mdaq = PyMLink.MLink('10.10.1.1')
+mdaq = microdaq.Device('10.10.1.1')
 
 # Read data from channels 1..4, input range from -10V to 10V, single ended
 data = mdaq.ai_read([1, 2, 3, 4], [-10, 10], False)
@@ -13,6 +13,3 @@ data = mdaq.ai_read([1, 2, 3, 4], [-10, 10], False)
 # Print data
 for i, volt in enumerate(data):
     print('Channel[%d]: %f V' % (i, volt))
-
-
-

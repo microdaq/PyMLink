@@ -1,10 +1,11 @@
-# MLink Python 2/3 binding
-# www.microdaq.org
-# Embedded-solutions 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
 import ctypes
 from functools import wraps
-from py_mlink import ctypes_mlink as cml
+
+import microdaq.ctypes_mlink as cml
 
 
 class MLinkError(Exception):
@@ -16,6 +17,7 @@ class MLinkError(Exception):
 
 
 class AIRange(object):
+    """Analog input ranges in volts."""
     AI_10V = [-10, 10]
     AI_10V_UNI = [0, 10]
 
@@ -32,6 +34,7 @@ class AIRange(object):
 
 
 class AORange(object):
+    """Analog output ranges in volts."""
     AO_10V = [-10, 10]
     AO_10V_UNI = [0, 10]
 
@@ -42,6 +45,7 @@ class AORange(object):
 
 
 class Triggers(object):
+    """Types of analog input and output triggers.""" 
     AI_TRIGGER = 1
     AO_TRIGGER = 2
     DSP_START = 3
@@ -64,10 +68,10 @@ def _connect_decorate(func):
     return func_wrapper
 
 
-class MLink:
+class Device:
     """
     Description:
-        Main class of MLink Python2.7 binding.
+        Main class of MLink binding. Represents MicroDAQ device.
     Usage:
         MLink(ip, maintain_connection=False)
         ip - IP address of MicroDAQ device
@@ -221,7 +225,7 @@ class MLink:
         Description:
             Returns tuple with model description of a connected MicroDAQ device
         Usage:
-            (serie, adc, dac, cpu, mem) = get_hw_info()
+            (series, adc, dac, cpu, mem) = get_hw_info()
          """
 
         return tuple(self._mdaq_hwid)
@@ -411,17 +415,21 @@ class MLink:
         if not isinstance(dio, list):
             dio = [dio]
 
-        value = ctypes.c_uint8()
-        data = []
-        for d in dio:
-            res = cml.mlink_dio_read(ctypes.pointer(self._linkfd), d, ctypes.pointer(value))
-            self._raise_exception(res)
-            data += [value.value]
+        dio_idx = ctypes.c_uint8 * len(dio)
+        dio_idx = dio_idx(*dio)
 
-        if len(data) == 1:
-            return data[0]
+        dio_val = ctypes.c_uint8 * len(dio)
+        dio_val = dio_val()
+
+        res = cml.mlink_dio_read(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
+        self._raise_exception(res)
+
+        val_list = list(dio_val)
+
+        if len(val_list) == 1:
+            return val_list[0]
         else:
-            return data
+            return val_list
 
     @_connect_decorate
     def dio_write(self, dio, state):
@@ -443,9 +451,15 @@ class MLink:
             raise MLinkError(
                 'dio_write: Number of channels and data is not equal!')
 
-        for i, d in enumerate(dio):
-            res = cml.mlink_dio_write(ctypes.pointer(self._linkfd), d, state[i])
-            self._raise_exception(res)
+        dio_idx = ctypes.c_uint8 * len(dio)
+        dio_idx = dio_idx(*dio)
+
+        dio_val = ctypes.c_uint8 * len(dio)
+        dio_val = dio_val(*state)
+
+        res = cml.mlink_dio_write(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
+        self._raise_exception(res)
+
 
     @_connect_decorate
     def func_key_read(self, key):

@@ -1,13 +1,13 @@
-# LED demo
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
 import time
 
-from py_mlink import PyMLink
+import microdaq
 
 # Create MLink object, connect to MicroDAQ device
-mdaq = PyMLink.MLink('10.10.1.1')
+mdaq = microdaq.Device('10.10.1.1')
 
 # turn on LED 1
 mdaq.led_write(1, True)
@@ -21,5 +21,3 @@ time.sleep(1.0)
 mdaq.led_write(1, False)
 # turn off LED 2
 mdaq.led_write(2, False)
-
-

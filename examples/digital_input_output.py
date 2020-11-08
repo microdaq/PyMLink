@@ -1,11 +1,11 @@
-# Digital I/O demo
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
-from py_mlink import PyMLink
+import microdaq
 
 # Create MLink object, connect to MicroDAQ device
-mdaq = PyMLink.MLink('10.10.1.1')
+mdaq = microdaq.Device('10.10.1.1')
 
 # Configure Digital I/O, disable all functions: encoder, pwm, uart
 for i in range(1, 7):
@@ -32,4 +32,3 @@ mdaq.dio_write(DO, DO_state)
 # Print data
 for i, di in enumerate(di_state):
     print('DI[%d]: %d' % (i, di))
-

@@ -5,7 +5,7 @@
 
 import pyqtgraph as pg
 
-from py_mlink import PyMLink
+import microdaq
 
 DATA_COUNT = 5000
 SAMPLE_RATE_HZ = 100000
@@ -13,11 +13,11 @@ DURATION_SEC = 60
 CHANNEL = 1
 
 # Create MLink object, connect to MicroDAQ device
-mdaq = PyMLink.MLink('10.10.1.1')
+mdaq = microdaq.Device('10.10.1.1')
 
 # Init analog input scan
 mdaq.ai_scan_init(
-    CHANNEL, PyMLink.AIRange.AI_5V,
+    CHANNEL, microdaq.AIRange.AI_5V,
     False, SAMPLE_RATE_HZ, DURATION_SEC)
 
 # Create plot with pyqtgraph
@@ -37,5 +37,3 @@ for i in range(int((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT)):
 
 win.close()
 print('done.')
-
-

@@ -1,6 +1,6 @@
 # This file is subject to the terms and conditions defined in
-# file 'LICENSE.txt', which is part of this source code package.
-# Embedded-solutions 2019-2020, www.microdaq.org
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
 """Py2/3 Wrapper of the MLink C library"""
 
@@ -10,9 +10,8 @@ import ctypes, os, sys
 from ctypes import *
 import platform
 import inspect
-import py_mlink
-
 _int_types = (c_int16, c_int32)
+
 if hasattr(ctypes, 'c_int64'):
     # Some builds of ctypes apparently do not have c_int64
     # defined; it's a pretty good bet that these builds do not
@@ -339,7 +338,7 @@ _libdirs = []
 # POSSIBILITY OF SUCH DAMAGE.
 # ----------------------------------------------------------------------------
 
-import os.path, re, sys, glob
+import os.path
 import ctypes
 import ctypes.util
 
@@ -349,261 +348,38 @@ def _environ_path(name):
     else:
         return []
 
-class LibraryLoader(object):
-    def __init__(self):
-        self.other_dirs=[]
-
-    def load_library(self,libname):
-        """Given the name of a library, load it."""
-        paths = self.getpaths(libname)
-
-        for path in paths:
-            if os.path.exists(path):
-                return self.load(path)
-
-        raise ImportError("%s not found." % libname)
-
-    def load(self,path):
-        """Given a path to a library, load it."""
-        try:
-            # Darwin requires dlopen to be called with mode RTLD_GLOBAL instead
-            # of the default RTLD_LOCAL.  Without this, you end up with
-            # libraries not being loadable, resulting in "Symbol not found"
-            # errors
-            if sys.platform == 'darwin':
-                return ctypes.CDLL(path, ctypes.RTLD_GLOBAL)
-            else:
-                return ctypes.cdll.LoadLibrary(path)
-        except OSError as e:
-            raise ImportError(e)
-
-    def getpaths(self,libname):
-        """Return a list of paths where the library might be found."""
-        if os.path.isabs(libname):
-            yield libname
-
-        else:
-            for path in self.getplatformpaths(libname):
-                yield path
-
-            path = ctypes.util.find_library(libname)
-            if path: yield path
-
-    def getplatformpaths(self, libname):
-        return []
-
-# Darwin (Mac OS X)
-
-class DarwinLibraryLoader(LibraryLoader):
-    name_formats = ["lib%s.dylib", "lib%s.so", "lib%s.bundle", "%s.dylib",
-                "%s.so", "%s.bundle", "%s"]
-
-    def getplatformpaths(self,libname):
-        if os.path.pathsep in libname:
-            names = [libname]
-        else:
-            names = [format % libname for format in self.name_formats]
-
-        for dir in self.getdirs(libname):
-            for name in names:
-                yield os.path.join(dir,name)
-
-    def getdirs(self,libname):
-        '''Implements the dylib search as specified in Apple documentation:
-
-        http://developer.apple.com/documentation/DeveloperTools/Conceptual/
-            DynamicLibraries/Articles/DynamicLibraryUsageGuidelines.html
-
-        Before commencing the standard search, the method first checks
-        the bundle's ``Frameworks`` directory if the application is running
-        within a bundle (OS X .app).
-        '''
-
-        dyld_fallback_library_path = _environ_path("DYLD_FALLBACK_LIBRARY_PATH")
-        if not dyld_fallback_library_path:
-            dyld_fallback_library_path = [os.path.expanduser('~/lib'),
-                                          '/usr/local/lib', '/usr/lib']
-
-        dirs = []
-
-        if '/' in libname:
-            dirs.extend(_environ_path("DYLD_LIBRARY_PATH"))
-        else:
-            dirs.extend(_environ_path("LD_LIBRARY_PATH"))
-            dirs.extend(_environ_path("DYLD_LIBRARY_PATH"))
-
-        dirs.extend(self.other_dirs)
-        dirs.append(".")
-
-        if hasattr(sys, 'frozen') and sys.frozen == 'macosx_app':
-            dirs.append(os.path.join(
-                os.environ['RESOURCEPATH'],
-                '..',
-                'Frameworks'))
-
-        dirs.extend(dyld_fallback_library_path)
-
-        return dirs
-
-# Posix
-
-class PosixLibraryLoader(LibraryLoader):
-    _ld_so_cache = None
-
-    def _create_ld_so_cache(self):
-        # Recreate search path followed by ld.so.  This is going to be
-        # slow to build, and incorrect (ld.so uses ld.so.cache, which may
-        # not be up-to-date).  Used only as fallback for distros without
-        # /sbin/ldconfig.
-        #
-        # We assume the DT_RPATH and DT_RUNPATH binary sections are omitted.
-
-        directories = []
-        for name in ("LD_LIBRARY_PATH",
-                     "SHLIB_PATH", # HPUX
-                     "LIBPATH", # OS/2, AIX
-                     "LIBRARY_PATH", # BE/OS
-                    ):
-            if name in os.environ:
-                directories.extend(os.environ[name].split(os.pathsep))
-        directories.extend(self.other_dirs)
-        directories.append(".")
-
-        try: directories.extend([dir.strip() for dir in open('/etc/ld.so.conf')])
-        except IOError: pass
-
-        directories.extend(['/lib', '/usr/lib', '/lib64', '/usr/lib64'])
-
-        cache = {}
-        lib_re = re.compile(r'lib(.*)\.s[ol]')
-        ext_re = re.compile(r'\.s[ol]$')
-        for dir in directories:
-            try:
-                for path in glob.glob("%s/*.s[ol]*" % dir):
-                    file = os.path.basename(path)
-
-                    # Index by filename
-                    if file not in cache:
-                        cache[file] = path
-
-                    # Index by library name
-                    match = lib_re.match(file)
-                    if match:
-                        library = match.group(1)
-                        if library not in cache:
-                            cache[library] = path
-            except OSError:
-                pass
-
-        self._ld_so_cache = cache
-
-    def getplatformpaths(self, libname):
-        if self._ld_so_cache is None:
-            self._create_ld_so_cache()
-
-        result = self._ld_so_cache.get(libname)
-        if result: yield result
-
-        path = ctypes.util.find_library(libname)
-        if path: yield os.path.join("/lib",path)
-
-# Windows
-
-class _WindowsLibrary(object):
-    def __init__(self, path):
-        self.cdll = ctypes.cdll.LoadLibrary(path)
-        self.windll = ctypes.windll.LoadLibrary(path)
-
-    def __getattr__(self, name):
-        try: return getattr(self.cdll,name)
-        except AttributeError:
-            try: return getattr(self.windll,name)
-            except AttributeError:
-                raise
-
-class WindowsLibraryLoader(LibraryLoader):
-    name_formats = ["%s.dll", "lib%s.dll", "%slib.dll"]
-
-    def load_library(self, libname):
-        try:
-            result = LibraryLoader.load_library(self, libname)
-        except ImportError:
-            result = None
-            if os.path.sep not in libname:
-                for name in self.name_formats:
-                    try:
-                        result = getattr(ctypes.cdll, name % libname)
-                        if result:
-                            break
-                    except WindowsError:
-                        result = None
-            if result is None:
-                try:
-                    result = getattr(ctypes.cdll, libname)
-                except WindowsError:
-                    result = None
-            if result is None:
-                raise ImportError("%s not found." % libname)
-        return result
-
-    def load(self, path):
-        return _WindowsLibrary(path)
-
-    def getplatformpaths(self, libname):
-        if os.path.sep not in libname:
-            for name in self.name_formats:
-                dll_in_current_dir = os.path.abspath(name % libname)
-                if os.path.exists(dll_in_current_dir):
-                    yield dll_in_current_dir
-                path = ctypes.util.find_library(name % libname)
-                if path:
-                    yield path
-
-# Platform switching
-
-# If your value of sys.platform does not appear in this dict, please contact
-# the Ctypesgen maintainers.
-
-loaderclass = {
-    "darwin":   DarwinLibraryLoader,
-    "cygwin":   WindowsLibraryLoader,
-    "win32":    WindowsLibraryLoader
+system_lib_32 = {
+    "Windows": "MLink32.dll",
+    "Darwin": "libmlink.dylib",
+    "Linux": "libmlink.so",
 }
 
-loader = loaderclass.get(sys.platform, PosixLibraryLoader)()
+system_lib_64 = {
+    "Windows": "MLink64.dll",
+    "Darwin": "libmlink.dylib",
+    "Linux": "libmlink.so",
+}
 
-def add_library_search_dirs(other_dirs):
-    loader.other_dirs = other_dirs
+archi = {
+    "32bit": ("x86", system_lib_32),
+    "64bit": ("x64", system_lib_64)
+}
 
-load_library = loader.load_library
+architecture = platform.architecture()[0]
+system = platform.system() 
 
-del loaderclass
+try:
+    arch_lookup = archi[architecture]
+    root_path = os.path.abspath(os.path.dirname(__file__))
+    lib_path = os.path.join(
+        root_path, 
+        arch_lookup[0], 
+        arch_lookup[1][system])
+    _libs["MLink"] = cdll.LoadLibrary(lib_path)
 
-# End loader
+except KeyError as err:
+    raise RuntimeError("Platform not supported.")
 
-add_library_search_dirs([])
-
-# Begin libraries
-
-libpath = ''
-if platform.system() == 'Windows':
-    libpath = os.path.dirname(inspect.getfile(py_mlink))+'/'
-    if platform.architecture()[0] == '32bit':
-        libname_ver = 'MLink32'
-    elif platform.architecture()[0] == '64bit':
-        libname_ver = 'MLink64'
-
-if platform.system() == 'Linux' or platform.system() == 'Darwin':
-    libname_ver = 'mlink'
-
-libname_ver = libpath+libname_ver
-_libs["MLink"] = load_library(libname_ver)
-
-
-# 1 libraries
-# End libraries
-
-# No modules
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 36
 for _lib in _libs.values():
@@ -758,7 +534,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_write'):
         continue
     mlink_dio_write = _lib.mlink_dio_write
-    mlink_dio_write.argtypes = [POINTER(c_int), c_uint8, c_uint8]
+    mlink_dio_write.argtypes = [POINTER(c_int), POINTER(c_uint8), POINTER(c_uint8), c_uint8]
     mlink_dio_write.restype = c_int
     break
 
@@ -767,7 +543,7 @@ for _lib in _libs.values():
     if not hasattr(_lib, 'mlink_dio_read'):
         continue
     mlink_dio_read = _lib.mlink_dio_read
-    mlink_dio_read.argtypes = [POINTER(c_int), c_uint8, POINTER(c_uint8)]
+    mlink_dio_read.argtypes = [POINTER(c_int), POINTER(c_uint8), POINTER(c_uint8), c_uint8]
     mlink_dio_read.restype = c_int
     break
 

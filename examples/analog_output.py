@@ -1,11 +1,11 @@
-# Analog output demo
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
-from py_mlink import PyMLink
+import microdaq
 
 # Create MLink object, connect to MicroDAQ device
-mdaq = PyMLink.MLink('10.10.1.1')
+mdaq = microdaq.Device('10.10.1.1')
 
 # Choose channels to write eg. 1..4
 ch = [1, 2, 3, 4]
@@ -14,5 +14,3 @@ ch_voltage = [0.5, 1, 1.5, 2]
 
 # Set analog outputs, output range from 0V to 5V
 mdaq.ao_write(ch, [0, 5], ch_voltage)
-
-

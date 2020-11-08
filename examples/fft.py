@@ -1,11 +1,11 @@
-# Scope FFT demo
-# visit site www.microdaq.org
-# Embedded-solutions, November 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
 import numpy as np
 import pyqtgraph as pg
 
-from py_mlink import PyMLink
+import microdaq
 
 # Params
 DATA_COUNT = 10000
@@ -32,11 +32,11 @@ p_data_handle = p_data.plot(xd, np.zeros(DATA_COUNT), pen="g")
 
 
 # Create MLink object, connect to MicroDAQ device
-mdaq = PyMLink.MLink('10.10.1.1')
+mdaq = microdaq.Device('10.10.1.1')
 
 # Init analog input scan
 mdaq.ai_scan_init(
-    CHANNEL, PyMLink.AIRange.AI_5V,
+    CHANNEL, microdaq.AIRange.AI_5V,
     False, SAMPLE_RATE_HZ, DURATION_SEC)
 
 print('Acquiring data...')
@@ -56,5 +56,3 @@ for i in range(int((DURATION_SEC*SAMPLE_RATE_HZ)/DATA_COUNT)):
 
 win.close()
 print('done.')
-
-
