@@ -18,6 +18,7 @@ class MLinkError(Exception):
 
 class AIRange(object):
     """Analog input ranges in volts."""
+
     AI_10V = [-10, 10]
     AI_10V_UNI = [0, 10]
 
@@ -35,6 +36,7 @@ class AIRange(object):
 
 class AORange(object):
     """Analog output ranges in volts."""
+
     AO_10V = [-10, 10]
     AO_10V_UNI = [0, 10]
 
@@ -45,7 +47,8 @@ class AORange(object):
 
 
 class Triggers(object):
-    """Types of analog input and output triggers.""" 
+    """Types of analog input and output triggers."""
+
     AI_TRIGGER = 1
     AO_TRIGGER = 2
     DSP_START = 3
@@ -65,6 +68,7 @@ def _connect_decorate(func):
         else:
             ans = func(self, *original_args, **original_kwargs)
         return ans
+
     return func_wrapper
 
 
@@ -82,7 +86,7 @@ class Device:
                     To keep connection call method reconnect() or any other method.
     """
 
-    def __init__(self, ip='10.10.1.1', maintain_connection=False):
+    def __init__(self, ip="10.10.1.1", maintain_connection=False):
         self._linkfd = -1
         self._ip = ip
         self._connectionless = maintain_connection
@@ -104,10 +108,11 @@ class Device:
     def _raise_exception(self, res):
         if res == -1:
             raise MLinkError(
-                'Session timeout, restore connection with reconnect()'
-                ' or connect(ip) method.')
+                "Session timeout, restore connection with reconnect()"
+                " or connect(ip) method."
+            )
         elif res < -1:
-            print('Error code:', res)
+            print("Error code:", res)
             raise MLinkError(self._get_error(res))
 
     @_connect_decorate
@@ -116,8 +121,8 @@ class Device:
         hwid_raw = hwid_raw(0)
 
         res = cml.mlink_hwid(
-            ctypes.pointer(self._linkfd),
-            ctypes.byref(hwid_raw))
+            ctypes.pointer(self._linkfd), ctypes.byref(hwid_raw)
+        )
 
         self._mdaq_hwid = hwid_raw
         self._raise_exception(res)
@@ -144,7 +149,9 @@ class Device:
         self._linkfd = ctypes.c_int32()
         self._ip = ip
 
-        res = cml.mlink_connect(ip.encode(), 4343, ctypes.pointer(self._linkfd))
+        res = cml.mlink_connect(
+            ip.encode(), 4343, ctypes.pointer(self._linkfd)
+        )
         self._raise_exception(res)
 
     def reconnect(self):
@@ -167,7 +174,7 @@ class Device:
             Returns the MicroDAQ firmware version
         Usage:
             (major, minor, fix, build) = get_fw_version()
-         """
+        """
 
         major = ctypes.c_int()
         minor = ctypes.c_int()
@@ -179,7 +186,8 @@ class Device:
             ctypes.pointer(major),
             ctypes.pointer(minor),
             ctypes.pointer(fix),
-            ctypes.pointer(build))
+            ctypes.pointer(build),
+        )
 
         self._raise_exception(res)
 
@@ -191,7 +199,7 @@ class Device:
             Returns the MLink library version
         Usage:
             (major, minor, fix, build) = get_lib_version()
-         """
+        """
         major = ctypes.c_int()
         minor = ctypes.c_int()
         fix = ctypes.c_int()
@@ -202,7 +210,8 @@ class Device:
             ctypes.pointer(major),
             ctypes.pointer(minor),
             ctypes.pointer(fix),
-            ctypes.pointer(build))
+            ctypes.pointer(build),
+        )
 
         self._raise_exception(res)
 
@@ -215,10 +224,10 @@ class Device:
             example output: 'MicroDAQ E2000-ADC09-DAC06-12'
         Usage:
             model = get_str_hw_info()
-            
-         """
 
-        return 'MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid)
+        """
+
+        return "MicroDAQ E%d-ADC%d-DAC%d-%d%d" % tuple(self._mdaq_hwid)
 
     def get_hw_info(self):
         """
@@ -226,7 +235,7 @@ class Device:
             Returns tuple with model description of a connected MicroDAQ device
         Usage:
             (series, adc, dac, cpu, mem) = get_hw_info()
-         """
+        """
 
         return tuple(self._mdaq_hwid)
 
@@ -246,7 +255,8 @@ class Device:
             ctypes.pointer(self._linkfd),
             dsp_application.encode(),
             rate,
-            duration)
+            duration,
+        )
 
         self._raise_exception(res)
 
@@ -280,7 +290,7 @@ class Device:
             return False
         elif res == 1:
             return True
-         
+
     @_connect_decorate
     def dsp_wait_until_done(self, timeout):
         """
@@ -294,7 +304,9 @@ class Device:
         if timeout > 0:
             timeout = timeout * 1000
 
-        res = cml.mlink_dsp_wait_until_done(ctypes.pointer(self._linkfd), timeout)
+        res = cml.mlink_dsp_wait_until_done(
+            ctypes.pointer(self._linkfd), timeout
+        )
 
         self._raise_exception(res)
 
@@ -302,14 +314,14 @@ class Device:
     def dsp_mem_write(self, index, data):
         """
         Description:
-            Writes data to MicroDAQ memory accesable by XCos 
+            Writes data to MicroDAQ memory accesable by XCos
             MEM read block.
         Usage:
             dsp_mem_write(index, data)
             index - memory beggining index
             data - data to be written
         """
-        
+
         if not isinstance(data, list):
             data = [data]
 
@@ -317,10 +329,8 @@ class Device:
         data_c = data_c(*data)
 
         res = cml.mlink_dsp_mem_write(
-            ctypes.pointer(self._linkfd),
-            index,
-            len(data),
-            data_c)
+            ctypes.pointer(self._linkfd), index, len(data), data_c
+        )
 
         self._raise_exception(res)
 
@@ -338,7 +348,7 @@ class Device:
         """
 
         timeout = timeout * 1000
-        data_size = vector_size*vector_count
+        data_size = vector_size * vector_count
         data = ctypes.c_double * data_size
         data = data()
         res = cml.mlink_dsp_signal_read(
@@ -347,13 +357,16 @@ class Device:
             vector_size,
             ctypes.byref(data),
             data_size,
-            timeout)
+            timeout,
+        )
 
         self._raise_exception(res)
         val_list = []
 
         for vec in range(0, vector_count):
-            val_list.append([data[i + (vec*vector_size)] for i in range(0, vector_size)])
+            val_list.append(
+                [data[i + (vec * vector_size)] for i in range(0, vector_size)]
+            )
 
         return val_list
 
@@ -400,7 +413,9 @@ class Device:
             direction - bank direction (True - output, False - input)
         """
 
-        res = cml.mlink_dio_set_dir(ctypes.pointer(self._linkfd), bank, direction, 0)
+        res = cml.mlink_dio_set_dir(
+            ctypes.pointer(self._linkfd), bank, direction, 0
+        )
         self._raise_exception(res)
 
     @_connect_decorate
@@ -421,7 +436,12 @@ class Device:
         dio_val = ctypes.c_uint8 * len(dio)
         dio_val = dio_val()
 
-        res = cml.mlink_dio_read(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
+        res = cml.mlink_dio_read(
+            ctypes.pointer(self._linkfd),
+            ctypes.byref(dio_idx),
+            ctypes.byref(dio_val),
+            len(dio),
+        )
         self._raise_exception(res)
 
         val_list = list(dio_val)
@@ -449,7 +469,8 @@ class Device:
 
         if len(dio) != len(state):
             raise ValueError(
-                'dio_write: Number of channels and data is not equal!')
+                "dio_write: Number of channels and data is not equal!"
+            )
 
         dio_idx = ctypes.c_uint8 * len(dio)
         dio_idx = dio_idx(*dio)
@@ -457,7 +478,12 @@ class Device:
         dio_val = ctypes.c_uint8 * len(dio)
         dio_val = dio_val(*state)
 
-        res = cml.mlink_dio_write(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
+        res = cml.mlink_dio_write(
+            ctypes.pointer(self._linkfd),
+            ctypes.byref(dio_idx),
+            ctypes.byref(dio_val),
+            len(dio),
+        )
         self._raise_exception(res)
 
     @_connect_decorate
@@ -471,7 +497,9 @@ class Device:
         """
 
         value = ctypes.c_uint8()
-        res = cml.mlink_func_read(ctypes.pointer(self._linkfd), key, ctypes.pointer(value))
+        res = cml.mlink_func_read(
+            ctypes.pointer(self._linkfd), key, ctypes.pointer(value)
+        )
         self._raise_exception(res)
 
         return value.value
@@ -498,18 +526,20 @@ class Device:
         Usage:
             enc_init(encoder, init_value)
             encoder - encoder module (1 or 2)
-            mode - mode - encoder counter mode 
+            mode - mode - encoder counter mode
                 0 - quadrature - ENCxA and ENCxB inputs are used for A and B channels
-                1 - dir - ENCxA input will provide the clock for position counter and the ENCxB 
-                          input will have the direction information. The position counteris 
-                          incremented on every rising edge of ENCxA input when the direction 
+                1 - dir - ENCxA input will provide the clock for position counter and the ENCxB
+                          input will have the direction information. The position counteris
+                          incremented on every rising edge of ENCxA input when the direction
                           input is high and decremented when the direction input is low.
                 2 - up - position counter is incremented on both edges of the ENCxA input.
                 3 - down - position counter is decremented on both edges of the ENCxA input.
             init_value - initial encoder value
         """
 
-        res = cml.mlink_enc_init(ctypes.pointer(self._linkfd), encoder, mode, init_value)
+        res = cml.mlink_enc_init(
+            ctypes.pointer(self._linkfd), encoder, mode, init_value
+        )
         self._raise_exception(res)
 
     @_connect_decorate
@@ -528,13 +558,16 @@ class Device:
             ctypes.pointer(self._linkfd),
             encoder,
             ctypes.pointer(enc_dir),
-            ctypes.pointer(position))
+            ctypes.pointer(position),
+        )
 
         self._raise_exception(res)
         return position.value, enc_dir.value
 
     @_connect_decorate
-    def pwm_init(self, pwm_module, period, active_low=False, duty_a=0, duty_b=0):
+    def pwm_init(
+        self, pwm_module, period, active_low=False, duty_a=0, duty_b=0
+    ):
         """
         Description:
             Setup MicroDAQ PWM outputs
@@ -553,7 +586,8 @@ class Device:
             period,
             active_low,
             duty_a,
-            duty_b)
+            duty_b,
+        )
 
         self._raise_exception(res)
 
@@ -570,15 +604,15 @@ class Device:
         """
 
         res = cml.mlink_pwm_write(
-            ctypes.pointer(self._linkfd),
-            module,
-            duty_a,
-            duty_b)
+            ctypes.pointer(self._linkfd), module, duty_a, duty_b
+        )
 
         self._raise_exception(res)
 
     @_connect_decorate
-    def ai_read(self, channels, ai_range=AIRange.AI_10V, is_differential=False):
+    def ai_read(
+        self, channels, ai_range=AIRange.AI_10V, is_differential=False
+    ):
         """
         Description:
             Reads MicroDAQ analog inputs
@@ -591,15 +625,15 @@ class Device:
                 AI_5V      - [-5, 5]
                 AI_5_12V   - [-5.12, 5.12]
                 AI_2V      - [-2, 2]
-                AI_2_56V   - [-2.56, 2.56]  
+                AI_2_56V   - [-2.56, 2.56]
                 AI_1V      - [-1, 1]
                 AI_1_24V   - [-1.24, 1.24]
                 AI_0_64V   - [-0.64, 0.64]
                 AIRange.AI_10V  -    single-range argument applied for all used channels
                 AIRange.AI_10V  + AIRange.AI_5V  - multi-range argument for two channels
 
-            is_differential - scalar or array with measurement mode settings: 
-                              True  - differential 
+            is_differential - scalar or array with measurement mode settings:
+                              True  - differential
                               False - single-ended mode
         """
 
@@ -615,16 +649,18 @@ class Device:
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
             raise ValueError(
-                'ai_read: Mode (is_differential parameter) vector'
-                ' should match selected AI channels')
+                "ai_read: Mode (is_differential parameter) vector"
+                " should match selected AI channels"
+            )
 
         if len(ai_range) == 2 and len(channels) != 1:
             range_cpy = ai_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
             raise ValueError(
-                'ai_read: Range vector should match selected AI channels!')
+                "ai_read: Range vector should match selected AI channels!"
+            )
 
         channels_idx = ctypes.c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
@@ -642,7 +678,8 @@ class Device:
             len(channels),
             ctypes.byref(channels_range),
             ctypes.byref(diff),
-            ctypes.byref(channels_val))
+            ctypes.byref(channels_val),
+        )
 
         self._raise_exception(res)
 
@@ -653,7 +690,9 @@ class Device:
             return val_list
 
     @_connect_decorate
-    def ai_scan_init(self, channels, ai_range, is_differential, rate, duration):
+    def ai_scan_init(
+        self, channels, ai_range, is_differential, rate, duration
+    ):
         """
         Description:
             Initiates analog input scanning session
@@ -690,17 +729,19 @@ class Device:
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
             raise ValueError(
-                'ai_scan_init: Mode (is_differential parameter) '
-                'vector should match selected AI channels')
+                "ai_scan_init: Mode (is_differential parameter) "
+                "vector should match selected AI channels"
+            )
 
         if len(ai_range) == 2 and len(channels) != 1:
             range_cpy = ai_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
             raise ValueError(
-                'ai_scan_init: Range vector should'
-                ' match selected AI channels!')
+                "ai_scan_init: Range vector should"
+                " match selected AI channels!"
+            )
 
         if duration < 0:
             duration = -1
@@ -721,7 +762,8 @@ class Device:
             channels_range,
             ctypes.byref(diff),
             ctypes.pointer(rate),
-            duration)
+            duration,
+        )
 
         self._raise_exception(res)
 
@@ -738,7 +780,7 @@ class Device:
         if timeout > -1:
             timeout = timeout * 1000
 
-        data_len = scan_count*len(self._ai_scan_channels)
+        data_len = scan_count * len(self._ai_scan_channels)
         channels_val = ctypes.c_double * data_len
         channels_val = channels_val()
 
@@ -746,13 +788,19 @@ class Device:
             ctypes.pointer(self._linkfd),
             ctypes.byref(channels_val),
             scan_count,
-            timeout)
+            timeout,
+        )
 
         self._raise_exception(res)
 
         val_list = []
         for channel in range(0, len(self._ai_scan_channels)):
-            val_list.append([channels_val[i+channel] for i in range(0, scan_count, len(self._ai_scan_channels))])
+            val_list.append(
+                [
+                    channels_val[i + channel]
+                    for i in range(0, scan_count, len(self._ai_scan_channels))
+                ]
+            )
 
         if len(val_list) == 1:
             return val_list[0]
@@ -788,15 +836,17 @@ class Device:
 
         if len(channels) != len(data):
             raise ValueError(
-                'ao_read: Data vector should match selected AI channels!')
+                "ao_read: Data vector should match selected AI channels!"
+            )
 
         if len(ao_range) == 2 and len(channels) != 1:
             range_cpy = ao_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ao_range = ao_range + range_cpy
-        elif len(channels) != len(ao_range)/2:
+        elif len(channels) != len(ao_range) / 2:
             raise ValueError(
-                'ao_read: Range vector should match selected AI channels!')
+                "ao_read: Range vector should match selected AI channels!"
+            )
 
         channels_idx = ctypes.c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
@@ -811,14 +861,15 @@ class Device:
             len(channels),
             ctypes.byref(channels_range),
             1,
-            ctypes.byref(channels_val))
+            ctypes.byref(channels_val),
+        )
 
         self._raise_exception(res)
 
     @_connect_decorate
     def ao_scan_init(
-            self, channels, initial_data, ao_range,
-            is_stream_mode, rate, duration):
+        self, channels, initial_data, ao_range, is_stream_mode, rate, duration
+    ):
         """
         Description:
             Initiates analog output scanning session
@@ -851,11 +902,12 @@ class Device:
 
         if len(ao_range) == 2 and len(channels) != 1:
             range_cpy = ao_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ao_range = ao_range + range_cpy
-        elif len(channels) != len(ao_range)/2:
+        elif len(channels) != len(ao_range) / 2:
             raise ValueError(
-                'ao_read: Range vector should match selected AI channels!')
+                "ao_read: Range vector should match selected AI channels!"
+            )
 
         data_size = 0
         if isinstance(initial_data[0], list):
@@ -863,7 +915,7 @@ class Device:
             if all(len(x) == data_size_ch for x in initial_data):
                 pass
             else:
-                raise ValueError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
 
             for ch_data in initial_data:
                 data_size = data_size + len(ch_data)
@@ -871,7 +923,7 @@ class Device:
             initial_data = sum(initial_data, [])
         else:
             if len(channels) > 1:
-                raise ValueError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
             data_size = len(initial_data)
 
         ao_data = ctypes.c_float * data_size
@@ -890,14 +942,15 @@ class Device:
             ctypes.byref(channels_range),
             ctypes.c_uint8(is_stream_mode),
             ctypes.c_float(rate),
-            ctypes.c_float(duration))
+            ctypes.c_float(duration),
+        )
 
         self._raise_exception(res)
 
     @_connect_decorate
     def ao_scan_data(self, channels, data, opt=True):
         """
-        TODO: 
+        TODO:
         Description:
            Queues data to be output
         Usage:
@@ -920,7 +973,7 @@ class Device:
             if all(len(x) == data_size_ch for x in data):
                 pass
             else:
-                raise ValueError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
 
             for ch_data in data:
                 data_size = data_size + len(ch_data)
@@ -928,7 +981,7 @@ class Device:
             data = sum(data, [])
         else:
             if len(channels) > 1:
-                raise ValueError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
             data_size = len(data)
 
         ch_len = len(channels)
@@ -944,7 +997,8 @@ class Device:
             ctypes.c_int(ch_len),
             ctypes.byref(ao_data),
             ctypes.c_int(data_size),
-            ctypes.c_uint8(opt))
+            ctypes.c_uint8(opt),
+        )
 
         self._raise_exception(res)
 
@@ -973,14 +1027,16 @@ class Device:
         if timeout > -1:
             timeout = timeout * 1000
 
-        res = cml.mlink_ao_scan_wait_until_done(ctypes.pointer(self._linkfd), timeout)
+        res = cml.mlink_ao_scan_wait_until_done(
+            ctypes.pointer(self._linkfd), timeout
+        )
         self._raise_exception(res)
 
         if res == 0:
             return False
         elif res == 1:
-            return True 
-        
+            return True
+
     @_connect_decorate
     def ao_scan_is_done(self):
         """
@@ -996,7 +1052,7 @@ class Device:
         if res == 0:
             return False
         elif res == 1:
-            return True 
+            return True
 
     @_connect_decorate
     def ao_scan_stop(self):
@@ -1034,13 +1090,11 @@ class Device:
         """
 
         res = cml.mlink_scan_trigger_dio(
-            ctypes.pointer(self._linkfd),
-            Triggers.AI_TRIGGER,
-            dio,
-            level)
+            ctypes.pointer(self._linkfd), Triggers.AI_TRIGGER, dio, level
+        )
 
         self._raise_exception(res)
-        
+
     @_connect_decorate
     def ai_scan_trigger_clear(self):
         """
@@ -1051,8 +1105,8 @@ class Device:
         """
 
         res = cml.mlink_scan_trigger_clear(
-            ctypes.pointer(self._linkfd),
-            Triggers.AI_TRIGGER)
+            ctypes.pointer(self._linkfd), Triggers.AI_TRIGGER
+        )
 
         self._raise_exception(res)
 
@@ -1076,7 +1130,8 @@ class Device:
             ctypes.pointer(self._linkfd),
             Triggers.AI_TRIGGER,
             pattern,
-            len(pattern))
+            len(pattern),
+        )
 
         self._raise_exception(res)
 
@@ -1100,7 +1155,8 @@ class Device:
             Triggers.AI_TRIGGER,
             module,
             position,
-            condition)
+            condition,
+        )
 
         self._raise_exception(res)
 
@@ -1118,11 +1174,11 @@ class Device:
         """
 
         res = cml.mlink_scan_trigger_external_start(
-            ctypes.pointer(self._linkfd),
-            Triggers.AI_TRIGGER, source)
+            ctypes.pointer(self._linkfd), Triggers.AI_TRIGGER, source
+        )
 
         self._raise_exception(res)
-        
+
     @_connect_decorate
     def ao_scan_trigger_dio(self, dio, level):
         """
@@ -1135,13 +1191,11 @@ class Device:
         """
 
         res = cml.mlink_scan_trigger_dio(
-            ctypes.pointer(self._linkfd),
-            Triggers.AO_TRIGGER,
-            dio,
-            level)
+            ctypes.pointer(self._linkfd), Triggers.AO_TRIGGER, dio, level
+        )
 
         self._raise_exception(res)
-        
+
     @_connect_decorate
     def ao_scan_trigger_clear(self):
         """
@@ -1152,8 +1206,8 @@ class Device:
         """
 
         res = cml.mlink_scan_trigger_clear(
-            ctypes.pointer(self._linkfd),
-            Triggers.AO_TRIGGER)
+            ctypes.pointer(self._linkfd), Triggers.AO_TRIGGER
+        )
 
         self._raise_exception(res)
 
@@ -1177,7 +1231,8 @@ class Device:
             ctypes.pointer(self._linkfd),
             Triggers.AO_TRIGGER,
             pattern,
-            len(pattern))
+            len(pattern),
+        )
 
         self._raise_exception(res)
 
@@ -1200,7 +1255,8 @@ class Device:
             ctypes.pointer(self._linkfd),
             Triggers.AO_TRIGGER,
             module,
-            condition)
+            condition,
+        )
 
         self._raise_exception(res)
 
@@ -1218,8 +1274,7 @@ class Device:
         """
 
         res = cml.mlink_scan_trigger_external_start(
-            ctypes.pointer(self._linkfd),
-            Triggers.AO_TRIGGER,
-            source)
+            ctypes.pointer(self._linkfd), Triggers.AO_TRIGGER, source
+        )
 
         self._raise_exception(res)
