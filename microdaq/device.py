@@ -448,7 +448,7 @@ class Device:
             state = [state]
 
         if len(dio) != len(state):
-            raise MLinkError(
+            raise ValueError(
                 'dio_write: Number of channels and data is not equal!')
 
         dio_idx = ctypes.c_uint8 * len(dio)
@@ -459,7 +459,6 @@ class Device:
 
         res = cml.mlink_dio_write(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
         self._raise_exception(res)
-
 
     @_connect_decorate
     def func_key_read(self, key):
@@ -615,7 +614,7 @@ class Device:
             for i in range(len(channels) - 1):
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
-            raise MLinkError(
+            raise ValueError(
                 'ai_read: Mode (is_differential parameter) vector'
                 ' should match selected AI channels')
 
@@ -624,7 +623,7 @@ class Device:
             for i in range(len(channels)-1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
-            raise MLinkError(
+            raise ValueError(
                 'ai_read: Range vector should match selected AI channels!')
 
         channels_idx = ctypes.c_int8 * len(channels)
@@ -690,7 +689,7 @@ class Device:
             for i in range(len(channels) - 1):
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
-            raise MLinkError(
+            raise ValueError(
                 'ai_scan_init: Mode (is_differential parameter) '
                 'vector should match selected AI channels')
 
@@ -699,7 +698,7 @@ class Device:
             for i in range(len(channels)-1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
-            raise MLinkError(
+            raise ValueError(
                 'ai_scan_init: Range vector should'
                 ' match selected AI channels!')
 
@@ -788,7 +787,7 @@ class Device:
             ao_range = [ao_range]
 
         if len(channels) != len(data):
-            raise MLinkError(
+            raise ValueError(
                 'ao_read: Data vector should match selected AI channels!')
 
         if len(ao_range) == 2 and len(channels) != 1:
@@ -796,7 +795,7 @@ class Device:
             for i in range(len(channels)-1):
                 ao_range = ao_range + range_cpy
         elif len(channels) != len(ao_range)/2:
-            raise MLinkError(
+            raise ValueError(
                 'ao_read: Range vector should match selected AI channels!')
 
         channels_idx = ctypes.c_int8 * len(channels)
@@ -855,7 +854,7 @@ class Device:
             for i in range(len(channels)-1):
                 ao_range = ao_range + range_cpy
         elif len(channels) != len(ao_range)/2:
-            raise MLinkError(
+            raise ValueError(
                 'ao_read: Range vector should match selected AI channels!')
 
         data_size = 0
@@ -864,7 +863,7 @@ class Device:
             if all(len(x) == data_size_ch for x in initial_data):
                 pass
             else:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError('Wrong AO scan data size.')
 
             for ch_data in initial_data:
                 data_size = data_size + len(ch_data)
@@ -872,7 +871,7 @@ class Device:
             initial_data = sum(initial_data, [])
         else:
             if len(channels) > 1:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError('Wrong AO scan data size.')
             data_size = len(initial_data)
 
         ao_data = ctypes.c_float * data_size
@@ -921,7 +920,7 @@ class Device:
             if all(len(x) == data_size_ch for x in data):
                 pass
             else:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError('Wrong AO scan data size.')
 
             for ch_data in data:
                 data_size = data_size + len(ch_data)
@@ -929,7 +928,7 @@ class Device:
             data = sum(data, [])
         else:
             if len(channels) > 1:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError('Wrong AO scan data size.')
             data_size = len(data)
 
         ch_len = len(channels)
