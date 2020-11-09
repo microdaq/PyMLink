@@ -7,7 +7,7 @@ from setuptools import find_packages
 
 setup(
     name="microdaq",
-    version="1.3.1",
+    version="1.3.4",
     packages=["microdaq"],
     package_data={
         "microdaq": [
@@ -16,6 +16,7 @@ setup(
             "x64/libmlink.so",
             "x86/libmlink.so",
             "x86/MLink32.dll",
+            "armel/libmlink.so"
         ]
     },
     extras_require={"full": ["pytest", "pyqtgraph", "numpy"]},
