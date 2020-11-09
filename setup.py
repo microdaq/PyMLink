@@ -8,7 +8,7 @@ from setuptools import find_packages
 setup(
     name="microdaq",
     version="1.3.1",
-    packages=find_packages(),
+    packages=["microdaq"],
     package_data={
         "microdaq": [
             "x64/MLink64.dll",
