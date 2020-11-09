@@ -637,7 +637,15 @@ class Device:
             is_differential - scalar or array with measurement mode settings:
                               True  - differential
                               False - single-ended mode
-        """
+
+        Return:
+            Voltage on every channel. Scalar if 'channel' parameter is a scalar.
+            list if 'channel' parameters is a list.
+
+            [value1, value2] = ai_read([1, 2])
+            [value] =  ai_read([1])
+            value = ai_read(1)
+       """
 
         if not isinstance(channels, list):
             channels = [channels]
@@ -686,7 +694,8 @@ class Device:
         self._raise_exception(res)
 
         val_list = [channels_val[i] for i in range(len(channels))]
-        if len(val_list) == 1:
+
+        if not isinstance(channels, list):
             return val_list[0]
         else:
             return val_list
