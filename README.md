@@ -19,7 +19,7 @@ In order to run any example, simply run a script, e.g.:\
     
     import microdaq
 
-    mdaq = micordaq.Device('10.10.1.1')  # connect to MDAQ
+    mdaq = microdaq.Device('10.10.1.1')  # connect to MDAQ
     mdaq.led_write(1, True)              # Turn on LED 1
     mdaq.led_write(2, True)              # Turn on LED 2
     time.sleep(1.0)                      # Wait a second
