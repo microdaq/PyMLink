@@ -9,11 +9,13 @@ import microdaq.ctypes_mlink as cml
 
 
 class MLinkError(Exception):
-    def __init__(self, value):
-        self.value = value
+    """Error returned by MLink library."""
+    def __init__(self, error_code, error_desc):
+        self.error_code = error_code
+        self.error_desc = error_desc
 
     def __str__(self):
-        return repr(self.value)
+        return repr(self.error_desc)
 
 
 class AIRange(object):
@@ -47,7 +49,7 @@ class AORange(object):
 
 
 class Triggers(object):
-    """Types of analog input and output triggers."""
+    """Type of analog input and output triggers."""
 
     AI_TRIGGER = 1
     AO_TRIGGER = 2
@@ -108,12 +110,12 @@ class Device:
     def _raise_exception(self, res):
         if res == -1:
             raise MLinkError(
+                res,
                 "Session timeout, restore connection with reconnect()"
-                " or connect(ip) method."
+                " or connect(ip) method.",
             )
         elif res < -1:
-            print("Error code:", res)
-            raise MLinkError(self._get_error(res))
+            raise MLinkError(res, self._get_error(res))
 
     @_connect_decorate
     def _hwid(self):
