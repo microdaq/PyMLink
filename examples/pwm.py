@@ -5,5 +5,5 @@
 import microdaq
 
 mdaq = microdaq.Device(ip="10.10.1.1")
-mdaq.pwm_init(pwm_module=1, period=1000)
-mdaq.pwm_write(pwm_module=1, duty_a=10, duty_b=50)
+mdaq.pwm_init(module=1, period=1000)
+mdaq.pwm_write(module=1, duty_a=10, duty_b=50)
