@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name="microdaq",
-    version="1.3.5",
+    version="1.4.0",
     packages=["microdaq"],
     package_data={
         "microdaq": [
@@ -17,13 +17,5 @@ setup(
             "x86/MLink32.dll",
             "armel/libmlink.so"
         ]
-    },
-    extras_require={
-        "qt": [
-            "pyqtgraph",
-            "numpy"],
-        "tests": [
-            "pytest",
-        ]
-    },
+    }
 )
