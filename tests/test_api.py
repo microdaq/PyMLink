@@ -124,6 +124,16 @@ def test_ai_scan_init(mock_mdaq):
 
 
 def test_ai_scan(mock_mdaq):
+    # need to initialize self._ai_scan_channels member
+    mock_mdaq.ai_scan_init(
+        channels=[1, 2],
+        ai_range=[-10, 10],
+        is_differential=False,
+        rate=1000,
+        duration=1,
+    )
+
+    # actual test
     mock_mdaq.ai_scan(scan_count=10, timeout=2)
 
 
