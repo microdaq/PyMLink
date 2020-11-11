@@ -1,19 +1,30 @@
-# microdaq
+# Microdaq
 
 This package allows users to use data acquisition under MicroDAQ hardware 
 with Python2.7 and Python 3. It provides an interface between the MLink driver 
-and Python. The package works with Windows x86/x64, Linux x86/x64, MacOS x64 
+and Python application. The package works with Windows x86/x64, Linux x86/x64, MacOS x64 
 and EABI ARM machines.
 
-## installation
+## Installation
 
 `pip install microdaq`
 
-## examples
-In order to run any example, simply run a script, e.g.:\
-`python exmaples/ai-demo.py`
+If already installed, upgrading could be done by\
+`pip install microdaq --upgrade `
+
+## Examples
+
+Sample programs are located in `examples` directory. In order to run them,
+connect MicroDAQ device to your computer and run chosen script without any 
+additional steps. For example: `python exmaples/ai-demo.py`
+
+Scripts from **'examples/complex'** require additional packages to work.\
+They could be installed via `pip install -r requirements/examples.txt` command.
+
+<br>
 
 ##### LED control example
+
 
     import time
     import microdaq
@@ -22,6 +33,8 @@ In order to run any example, simply run a script, e.g.:\
     mdaq.led_write(led_id=1, state=True)     # Turn on LED 1
     time.sleep(1.0)                          # Wait a second
     mdaq.led_write(led_id=1, state=False)    # Turn off LED 1
+
+<br>
 
 ##### Analog input 
 
@@ -34,13 +47,15 @@ In order to run any example, simply run a script, e.g.:\
     for i, volt in enumerate(data):
         print('Channel[%d]: %f V' % (i, volt))
 
+<br>
+
 ##### Analog output
 
     import time
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')                     # connect to MDAQ
-    mdaq.ao_write(
+    mdaq.ao_write(                                             # read channel 1, 2
         channels=[1, 2], 
         ao_range=micordaq.AORange.AO_5V_UNI, 
         data=[1.0, 2.0])  
@@ -48,15 +63,19 @@ In order to run any example, simply run a script, e.g.:\
     for i, volt in enumerate(data):
         print('Channel[%d]: %f V' % (i, volt))
         
+<br>
+
 ##### PWM
 
     import time
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')                     # connect to MDAQ
-    mdaq.pwm_init(1, 1000)
-    mdaq.pwm_write(pwm_module, 10, 50)
+    mdaq.pwm_init(pwm_module=1, period=1000)                   # setup PWM01
+    mdaq.pwm_write(pwm_module=1, duty_a=10, duty_b=50)         # start PWM01 
     
+<br>
+
 ##### DSP with Scilab XCOS model 
     
 ## license
