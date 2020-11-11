@@ -638,8 +638,9 @@ class Device:
                               False - single-ended mode
 
         Return:
-            Voltage on every channel. Scalar if 'channel' parameter is a scalar.
-            list if 'channel' parameters is a list.
+            Voltage on every 'channel'. Float type if 'channel' parameter is
+            a single int (scalar), a list of floats if 'channel' parameter
+            is a list of ints.
 
             [value1, value2] = ai_read([1, 2])
             [value] =  ai_read([1])
