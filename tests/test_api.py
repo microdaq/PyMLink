@@ -90,15 +90,15 @@ def test_func_key_read(mock_mdaq):
 
 
 def test_led_write(mock_mdaq):
-    mock_mdaq.led_write(led_id=1, state=1)
+    mock_mdaq.led_write(led=1, state=1)
 
 
 def test_enc_init(mock_mdaq):
-    mock_mdaq.enc_init(encoder=1, mode=0)
+    mock_mdaq.enc_init(module=1, mode=0)
 
 
 def test_enc_read(mock_mdaq):
-    mock_mdaq.enc_read(encoder=1)
+    mock_mdaq.enc_read(module=1)
 
 
 def test_pwm_init(mock_mdaq):

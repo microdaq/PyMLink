@@ -508,7 +508,7 @@ class Device:
         return value.value
 
     @_connect_decorate
-    def led_write(self, led_id, state):
+    def led_write(self, led, state):
         """
         Description:
             Sets MicroDAQ LEDs state
@@ -518,17 +518,17 @@ class Device:
             state - LED state (True - ON, False - OFF)
         """
 
-        res = cml.mlink_led_write(ctypes.pointer(self._linkfd), led_id, state)
+        res = cml.mlink_led_write(ctypes.pointer(self._linkfd), led, state)
         self._raise_exception(res)
 
     @_connect_decorate
-    def enc_init(self, encoder, mode=0, init_value=0):
+    def enc_init(self, module, mode=0, init_value=0):
         """
         Description:
             Initializes encoder module
         Usage:
             enc_init(encoder, init_value)
-            encoder - encoder module (1 or 2)
+            module - encoder module (1 or 2)
             mode - mode - encoder counter mode
                 0 - quadrature - ENCxA and ENCxB inputs are used for A and B channels
                 1 - dir - ENCxA input will provide the clock for position counter and the ENCxB
@@ -541,25 +541,25 @@ class Device:
         """
 
         res = cml.mlink_enc_init(
-            ctypes.pointer(self._linkfd), encoder, mode, init_value
+            ctypes.pointer(self._linkfd), module, mode, init_value
         )
         self._raise_exception(res)
 
     @_connect_decorate
-    def enc_read(self, encoder):
+    def enc_read(self, module):
         """
         Description:
             Reads encoder position and motion direction
         Usage:
             enc_read(encoder)
-            encoder - encoder module (1 or 2)
+            module - encoder module (1 or 2)
         """
 
         enc_dir = ctypes.c_uint8()
         position = ctypes.c_int32()
         res = cml.mlink_enc_read(
             ctypes.pointer(self._linkfd),
-            encoder,
+            module,
             ctypes.pointer(enc_dir),
             ctypes.pointer(position),
         )
