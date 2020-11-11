@@ -568,14 +568,14 @@ class Device:
 
     @_connect_decorate
     def pwm_init(
-        self, pwm_module, period, active_low=False, duty_a=0, duty_b=0
+        self, module, period, active_low=False, duty_a=0, duty_b=0
     ):
         """
         Description:
             Setup MicroDAQ PWM outputs
         Usage:
             pwm_init(module, period, active_low=False, duty_a=0, duty_b=0)
-            pwm_module - PWM module (1, 2 or 3)
+            module - PWM module (1, 2 or 3)
             period - PWM module period in microseconds(1-1000000)
             active_low - PWM waveform polarity (True or False)
             duty_a - PWM channel A duty (0-100)
@@ -584,7 +584,7 @@ class Device:
 
         res = cml.mlink_pwm_init(
             ctypes.pointer(self._linkfd),
-            pwm_module,
+            module,
             period,
             active_low,
             duty_a,
@@ -1261,11 +1261,11 @@ class Device:
             condition - 1: trigger when encoder value is greater than position parameter
                         0: trigger when encoder value is lower than poisiotn parameter
         """
-
         res = cml.mlink_scan_trigger_encoder(
             ctypes.pointer(self._linkfd),
             Triggers.AO_TRIGGER,
             module,
+            position,
             condition,
         )
 
