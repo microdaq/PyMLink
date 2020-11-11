@@ -371,14 +371,26 @@ system = platform.system()
 try:
     arch_lookup = archi[architecture]
     root_path = os.path.abspath(os.path.dirname(__file__))
-    lib_path = os.path.join(
-        root_path, 
-        arch_lookup[0], 
-        arch_lookup[1][system])
+
+    # WA for ARM platforms
+    if system == "Linux" and platform.uname()[4].startswith('arm'):
+        lib_path = os.path.join(
+            root_path,
+            "armel",
+            "libmlink.so")
+
+    # Windows/Darwin/Linux
+    else:
+        lib_path = os.path.join(
+            root_path,
+            arch_lookup[0],
+            arch_lookup[1][system])
+
     _libs["MLink"] = cdll.LoadLibrary(lib_path)
 
 except KeyError as err:
-    raise RuntimeError("Platform not supported.")
+    raise RuntimeError(
+        "Platform {} {} is not supported.".format(architecture, system))
 
 
 # /home/witczenko/Downloads/Scilab-master/microdaq/etc/mlink/MLink/MLink2.h: 36
