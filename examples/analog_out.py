@@ -4,13 +4,13 @@
 
 import microdaq
 
-# Create MLink object, connect to MicroDAQ device
+# connect to MicroDAQ device
 mdaq = microdaq.Device('10.10.1.1')
 
-# Choose channels to write eg. 1..4
+# choose channels to write eg. 1..4
 ch = [1, 2, 3, 4]
-# Set values
+# set values
 ch_voltage = [0.5, 1, 1.5, 2]
 
-# Set analog outputs, output range from 0V to 5V
+# set analog outputs, output range from 0V to 5V
 mdaq.ao_write(ch, [0, 5], ch_voltage)

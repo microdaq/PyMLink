@@ -6,7 +6,7 @@ import time
 
 import microdaq
 
-# Create MLink object, connect to MicroDAQ device
+# connect to MicroDAQ device
 mdaq = microdaq.Device('10.10.1.1')
 
 # turn on LED 1

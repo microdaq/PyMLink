@@ -38,7 +38,6 @@ They could be installed via `pip install -r requirements/examples.txt` command.
 
 ##### Analog input 
 
-    import time
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')                     # connect to MDAQ
@@ -51,7 +50,6 @@ They could be installed via `pip install -r requirements/examples.txt` command.
 
 ##### Analog output
 
-    import time
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')                     # connect to MDAQ
@@ -67,7 +65,6 @@ They could be installed via `pip install -r requirements/examples.txt` command.
 
 ##### PWM
 
-    import time
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')                     # connect to MDAQ
@@ -80,4 +77,4 @@ They could be installed via `pip install -r requirements/examples.txt` command.
     
 ## license
 
-The BSD license. For more information read _LICENSE_ file.  
+The BSD license. For more information read **LICENSE.md** file.  
