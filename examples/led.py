@@ -7,7 +7,7 @@ import time
 import microdaq
 
 # connect to MicroDAQ device
-mdaq = microdaq.Device('10.10.1.1')
+mdaq = microdaq.Device("10.10.1.1")
 
 # turn on LED 1
 mdaq.led_write(1, True)

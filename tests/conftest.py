@@ -31,8 +31,7 @@ def ip(request):
 
 @pytest.fixture
 def mdaq(ip, mock, mock_mdaq):
-    """Return MLink class instance with established connection.
-    """
+    """Return MLink class instance with established connection."""
 
     return microdaq.Device(ip)
 

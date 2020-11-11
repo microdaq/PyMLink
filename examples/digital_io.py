@@ -5,7 +5,7 @@
 import microdaq
 
 # connect to MicroDAQ device
-mdaq = microdaq.Device('10.10.1.1')
+mdaq = microdaq.Device("10.10.1.1")
 
 # configure Digital I/O, disable all functions: encoder, PWM, UART
 for i in range(1, 7):
@@ -31,4 +31,4 @@ mdaq.dio_write(DO, DO_state)
 
 # print data
 for i, di in enumerate(di_state):
-    print('DI[%d]: %d' % (i, di))
+    print("DI[%d]: %d" % (i, di))

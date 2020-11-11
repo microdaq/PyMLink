@@ -4,6 +4,6 @@
 
 import microdaq
 
-mdaq = microdaq.Device(ip='10.10.1.1')                     # connect to MDAQ
-mdaq.pwm_init(pwm_module=1, period=1000)                   # setup PWM01
-mdaq.pwm_write(pwm_module=1, duty_a=10, duty_b=50)         # start PWM01
+mdaq = microdaq.Device(ip="10.10.1.1")  # connect to MDAQ
+mdaq.pwm_init(pwm_module=1, period=1000)  # setup PWM01
+mdaq.pwm_write(pwm_module=1, duty_a=10, duty_b=50)  # start PWM01

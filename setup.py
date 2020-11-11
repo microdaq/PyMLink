@@ -15,7 +15,7 @@ setup(
             "x64/libmlink.so",
             "x86/libmlink.so",
             "x86/MLink32.dll",
-            "armel/libmlink.so"
+            "armel/libmlink.so",
         ]
-    }
+    },
 )

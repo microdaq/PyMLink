@@ -5,7 +5,7 @@
 import microdaq
 
 # connect to MicroDAQ device
-mdaq = microdaq.Device('10.10.1.1')
+mdaq = microdaq.Device("10.10.1.1")
 
 # choose channels to write eg. 1..4
 ch = [1, 2, 3, 4]

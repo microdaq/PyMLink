@@ -8,7 +8,7 @@ from time import sleep
 import microdaq
 
 # Connect to MicroDAQ device
-mdaq = microdaq.Device('10.10.1.1')
+mdaq = microdaq.Device("10.10.1.1")
 
 mdaq.ai_scan_init([1], [-10, 10], False, 1000, 1)
 mdaq.ai_scan_trigger_ext_start(microdaq.Triggers.AO_SCAN_START)

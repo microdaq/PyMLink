@@ -10,6 +10,7 @@ import microdaq.ctypes_mlink as cml
 
 class MLinkError(Exception):
     """Error returned by MLink library."""
+
     def __init__(self, error_code, error_desc):
         self.error_code = error_code
         self.error_desc = error_desc
@@ -567,9 +568,7 @@ class Device:
         return position.value, enc_dir.value
 
     @_connect_decorate
-    def pwm_init(
-        self, module, period, active_low=False, duty_a=0, duty_b=0
-    ):
+    def pwm_init(self, module, period, active_low=False, duty_a=0, duty_b=0):
         """
         Description:
             Setup MicroDAQ PWM outputs
@@ -645,7 +644,7 @@ class Device:
             [value1, value2] = ai_read([1, 2])
             [value] =  ai_read([1])
             value = ai_read(1)
-       """
+        """
 
         if not isinstance(channels, list):
             channels = [channels]
