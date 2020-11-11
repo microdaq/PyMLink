@@ -19,8 +19,8 @@ def pytest_addoption(parser):
     parser.addoption(
         "--ip",
         action="store",
-        default="192.168.1.1",
-        help="Set MicroDAQs IP (default: 192.168.1.1)",
+        default="10.10.1.1",
+        help="Set MicroDAQs IP (default: 10.10.1.1)",
     )
 
 
@@ -30,7 +30,7 @@ def ip(request):
 
 
 @pytest.fixture
-def mdaq(ip, mock, mock_mdaq):
+def mdaq(ip):
     """Return MLink class instance with established connection."""
 
     return microdaq.Device(ip)
@@ -39,8 +39,6 @@ def mdaq(ip, mock, mock_mdaq):
 @pytest.fixture
 def mdaq_cls():
     """Return MLink class or mocked MLink class.
-
-    NOTE: Returned object depends on --mock parameter.
     """
 
     return tests.mock_device.Device
