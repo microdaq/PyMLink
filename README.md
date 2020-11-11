@@ -30,9 +30,9 @@ Turn on and turn off LED 1.
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')
-    mdaq.led_write(led_id=1, state=True)
+    mdaq.led_write(led=1, state=True)
     time.sleep(1.0)
-    mdaq.led_write(led_id=1, state=False)
+    mdaq.led_write(led=1, state=False)
 
 <br>
 
@@ -82,11 +82,11 @@ Read encoder position.
     import microdaq
 
     mdaq = microdaq.Device(ip='10.10.1.1')
-    mdaq.enc_init(encoder=1, init_value=0)
+    mdaq.enc_init(module=1, init_value=0)
 
     for i in range(30):
         time.sleep(0.1)
-        enc = mdaq.enc_read(encoder=1)
+        enc = mdaq.enc_read(module=1)
         print('position: %d\tdir: %d' % (enc[0], enc[1]))
 
     
