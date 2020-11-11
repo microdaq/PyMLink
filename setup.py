@@ -3,11 +3,10 @@
 # Embedded-solutions 2017-2020, www.microdaq.org
 
 from setuptools import setup
-from setuptools import find_packages
 
 setup(
     name="microdaq",
-    version="1.3.4",
+    version="1.3.5",
     packages=["microdaq"],
     package_data={
         "microdaq": [
@@ -19,5 +18,12 @@ setup(
             "armel/libmlink.so"
         ]
     },
-    extras_require={"full": ["pytest", "pyqtgraph", "numpy"]},
+    extras_require={
+        "qt": [
+            "pyqtgraph",
+            "numpy"],
+        "tests": [
+            "pytest",
+        ]
+    },
 )
