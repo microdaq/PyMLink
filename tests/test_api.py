@@ -7,7 +7,6 @@ A module tests Python integration with C MLink library. No MicroDAQ device
 is required.
 """
 
-import os
 
 import microdaq
 
@@ -41,8 +40,7 @@ def test_get_hw_info(mock_mdaq):
 
 
 def test_dsp_init(mock_mdaq):
-    xcos_model = os.path.join("model", "signal-model.out")
-    mock_mdaq.dsp_init(dsp_application=xcos_model, rate=10, duration=-1)
+    mock_mdaq.dsp_init(dsp_application="placeholder", rate=10, duration=-1)
 
 
 def test_dsp_start(mock_mdaq):
