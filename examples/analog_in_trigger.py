@@ -19,7 +19,7 @@ try:
 except microdaq.MLinkError as error:
     print("Error: %s" % error)
 
-mdaq.dsp_init(os.path.join("model", "signal-model.out"), 100, -1)
+mdaq.dsp_init(os.path.join("resources", "signal-model.out"), 100, -1)
 mdaq.dsp_start()
 
 data = mdaq.ai_scan(10, 2)
