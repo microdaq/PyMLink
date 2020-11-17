@@ -5,6 +5,22 @@
 import microdaq
 
 mdaq = microdaq.Device("10.10.1.1")
-print("Firmware version: %s" % mdaq.get_fw_version())
-print("MLink version:    %s" % mdaq.get_lib_version())
-print("Device version:   %s" % mdaq.get_str_hw_info())
+print(
+    "Firmware version (major.minor.fix.build): %d.%d.%d.%d"
+    % mdaq.get_fw_version()
+)
+
+print(
+    "MLink version (major.minor.fix.build): %d.%d.%d.%d"
+    % mdaq.get_lib_version()
+)
+
+print(
+    "Hardware version\n"
+    "Series: %d\n"
+    "ADC: %d\n"
+    "DAC: %d\n"
+    "CPU: %d\n"
+    "MEM: %d\n" % mdaq.get_hw_info()
+)
+print("Hardware version (str): %s" % mdaq.get_str_hw_info())
