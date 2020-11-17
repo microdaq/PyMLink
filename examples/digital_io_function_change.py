@@ -5,11 +5,12 @@
 import microdaq
 
 mdaq = microdaq.Device("10.10.1.1")
-for i in range(1, 7):
-    mdaq.dio_func(i, False)
 
-for i in range(1, 9):
-    print("DI %d: %d" % (i, mdaq.dio_read(i)))
+# disable UART function for DIO9 to allow dio_write() operation
+mdaq.dio_func(6, False)
 
-for i in range(9, 17):
-    mdaq.dio_write(i, True)
+# set digital output state to 1
+mdaq.dio_write(9, True)
+
+# enable DIO9 alternative function (UART)
+mdaq.dio_func(6, True)
