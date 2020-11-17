@@ -1140,7 +1140,7 @@ class Device:
         res = cml.mlink_scan_trigger_dio_pattern(
             ctypes.pointer(self._linkfd),
             Triggers.AI_TRIGGER,
-            pattern,
+            pattern.encode("ascii"),
             len(pattern),
         )
 
