@@ -49,6 +49,28 @@ Read analog input channels 1 and 2.
 
 <br>
 
+##### Continuous data acquisition
+Read analog input from channel 1, 100 kHz sampling period for a 0.1 second.
+Expected 10 000 samples. 
+
+    import microdaq
+
+    mdaq = microdaq.Device("10.10.1.1")
+    mdaq.ai_scan_init(
+        channels=[1], 
+        ai_range=[-10, 10], 
+        is_differential=[False], 
+        rate=100000, 
+        duration=0.1)
+        
+    data = mdaq.ai_scan(
+        scan_count=10000, 
+        timeout=True)
+
+    for sample in data:
+        print('%f V' % sample)
+<br>
+
 ##### Analog output
 Set 1.0V and 2.0V to analog output channels 1 and 2 respectively.
 Used range 0-5 volts. 
