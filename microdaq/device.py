@@ -1,21 +1,27 @@
-# MLink Python 2/3 binding
-# www.microdaq.org
-# Embedded-solutions 2017-2019
+# This file is subject to the terms and conditions defined in
+# file 'LICENSE.md', which is part of this source code package.
+# Embedded-solutions 2017-2020, www.microdaq.org
 
 import ctypes
 from functools import wraps
-from py_mlink import ctypes_mlink as cml
+
+import microdaq.ctypes_mlink as cml
 
 
 class MLinkError(Exception):
-    def __init__(self, value):
-        self.value = value
+    """Error returned by MLink library."""
+
+    def __init__(self, error_code, error_desc):
+        self.error_code = error_code
+        self.error_desc = error_desc
 
     def __str__(self):
-        return repr(self.value)
+        return repr(self.error_desc)
 
 
 class AIRange(object):
+    """Analog input ranges in volts."""
+
     AI_10V = [-10, 10]
     AI_10V_UNI = [0, 10]
 
@@ -32,6 +38,8 @@ class AIRange(object):
 
 
 class AORange(object):
+    """Analog output ranges in volts."""
+
     AO_10V = [-10, 10]
     AO_10V_UNI = [0, 10]
 
@@ -42,6 +50,8 @@ class AORange(object):
 
 
 class Triggers(object):
+    """Type of analog input and output triggers."""
+
     AI_TRIGGER = 1
     AO_TRIGGER = 2
     DSP_START = 3
@@ -61,13 +71,14 @@ def _connect_decorate(func):
         else:
             ans = func(self, *original_args, **original_kwargs)
         return ans
+
     return func_wrapper
 
 
-class MLink:
+class Device:
     """
     Description:
-        Main class of MLink Python2.7 binding.
+        Main class of MLink binding. Represents MicroDAQ device.
     Usage:
         MLink(ip, maintain_connection=False)
         ip - IP address of MicroDAQ device
@@ -78,7 +89,7 @@ class MLink:
                     To keep connection call method reconnect() or any other method.
     """
 
-    def __init__(self, ip='10.10.1.1', maintain_connection=False):
+    def __init__(self, ip="10.10.1.1", maintain_connection=False):
         self._linkfd = -1
         self._ip = ip
         self._connectionless = maintain_connection
@@ -100,11 +111,12 @@ class MLink:
     def _raise_exception(self, res):
         if res == -1:
             raise MLinkError(
-                'Session timeout, restore connection with reconnect()'
-                ' or connect(ip) method.')
+                res,
+                "Session timeout, restore connection with reconnect()"
+                " or connect(ip) method.",
+            )
         elif res < -1:
-            print('Error code:', res)
-            raise MLinkError(self._get_error(res))
+            raise MLinkError(res, self._get_error(res))
 
     @_connect_decorate
     def _hwid(self):
@@ -112,8 +124,8 @@ class MLink:
         hwid_raw = hwid_raw(0)
 
         res = cml.mlink_hwid(
-            ctypes.pointer(self._linkfd),
-            ctypes.byref(hwid_raw))
+            ctypes.pointer(self._linkfd), ctypes.byref(hwid_raw)
+        )
 
         self._mdaq_hwid = hwid_raw
         self._raise_exception(res)
@@ -140,7 +152,9 @@ class MLink:
         self._linkfd = ctypes.c_int32()
         self._ip = ip
 
-        res = cml.mlink_connect(ip.encode(), 4343, ctypes.pointer(self._linkfd))
+        res = cml.mlink_connect(
+            ip.encode(), 4343, ctypes.pointer(self._linkfd)
+        )
         self._raise_exception(res)
 
     def reconnect(self):
@@ -163,7 +177,7 @@ class MLink:
             Returns the MicroDAQ firmware version
         Usage:
             (major, minor, fix, build) = get_fw_version()
-         """
+        """
 
         major = ctypes.c_int()
         minor = ctypes.c_int()
@@ -175,7 +189,8 @@ class MLink:
             ctypes.pointer(major),
             ctypes.pointer(minor),
             ctypes.pointer(fix),
-            ctypes.pointer(build))
+            ctypes.pointer(build),
+        )
 
         self._raise_exception(res)
 
@@ -187,7 +202,7 @@ class MLink:
             Returns the MLink library version
         Usage:
             (major, minor, fix, build) = get_lib_version()
-         """
+        """
         major = ctypes.c_int()
         minor = ctypes.c_int()
         fix = ctypes.c_int()
@@ -198,21 +213,34 @@ class MLink:
             ctypes.pointer(major),
             ctypes.pointer(minor),
             ctypes.pointer(fix),
-            ctypes.pointer(build))
+            ctypes.pointer(build),
+        )
 
         self._raise_exception(res)
 
         return major.value, minor.value, fix.value, build.value
 
-    def hw_info(self):
+    def get_str_hw_info(self):
         """
         Description:
-            Prints model of a connected MicroDAQ device
+            Returns string with model of a connected MicroDAQ device
+            example output: 'MicroDAQ E2000-ADC09-DAC06-12'
         Usage:
-            hw_info()
-         """
+            model = get_str_hw_info()
 
-        print('MicroDAQ E%d-ADC%d-DAC%d-%d%d' % tuple(self._mdaq_hwid))
+        """
+
+        return "MicroDAQ E%d-ADC%d-DAC%d-%d%d" % tuple(self._mdaq_hwid)
+
+    def get_hw_info(self):
+        """
+        Description:
+            Returns tuple with model description of a connected MicroDAQ device
+        Usage:
+            (series, adc, dac, cpu, mem) = get_hw_info()
+        """
+
+        return tuple(self._mdaq_hwid)
 
     @_connect_decorate
     def dsp_init(self, dsp_application, rate, duration):
@@ -230,7 +258,8 @@ class MLink:
             ctypes.pointer(self._linkfd),
             dsp_application.encode(),
             rate,
-            duration)
+            duration,
+        )
 
         self._raise_exception(res)
 
@@ -264,7 +293,7 @@ class MLink:
             return False
         elif res == 1:
             return True
-         
+
     @_connect_decorate
     def dsp_wait_until_done(self, timeout):
         """
@@ -278,7 +307,9 @@ class MLink:
         if timeout > 0:
             timeout = timeout * 1000
 
-        res = cml.mlink_dsp_wait_until_done(ctypes.pointer(self._linkfd), timeout)
+        res = cml.mlink_dsp_wait_until_done(
+            ctypes.pointer(self._linkfd), timeout
+        )
 
         self._raise_exception(res)
 
@@ -286,14 +317,14 @@ class MLink:
     def dsp_mem_write(self, index, data):
         """
         Description:
-            Writes data to MicroDAQ memory accesable by XCos 
+            Writes data to MicroDAQ memory accesable by XCos
             MEM read block.
         Usage:
             dsp_mem_write(index, data)
             index - memory beggining index
             data - data to be written
         """
-        
+
         if not isinstance(data, list):
             data = [data]
 
@@ -301,10 +332,8 @@ class MLink:
         data_c = data_c(*data)
 
         res = cml.mlink_dsp_mem_write(
-            ctypes.pointer(self._linkfd),
-            index,
-            len(data),
-            data_c)
+            ctypes.pointer(self._linkfd), index, len(data), data_c
+        )
 
         self._raise_exception(res)
 
@@ -322,7 +351,7 @@ class MLink:
         """
 
         timeout = timeout * 1000
-        data_size = vector_size*vector_count
+        data_size = vector_size * vector_count
         data = ctypes.c_double * data_size
         data = data()
         res = cml.mlink_dsp_signal_read(
@@ -331,13 +360,16 @@ class MLink:
             vector_size,
             ctypes.byref(data),
             data_size,
-            timeout)
+            timeout,
+        )
 
         self._raise_exception(res)
         val_list = []
 
         for vec in range(0, vector_count):
-            val_list.append([data[i + (vec*vector_size)] for i in range(0, vector_size)])
+            val_list.append(
+                [data[i + (vec * vector_size)] for i in range(0, vector_size)]
+            )
 
         return val_list
 
@@ -384,7 +416,9 @@ class MLink:
             direction - bank direction (True - output, False - input)
         """
 
-        res = cml.mlink_dio_set_dir(ctypes.pointer(self._linkfd), bank, direction, 0)
+        res = cml.mlink_dio_set_dir(
+            ctypes.pointer(self._linkfd), bank, direction, 0
+        )
         self._raise_exception(res)
 
     @_connect_decorate
@@ -405,7 +439,12 @@ class MLink:
         dio_val = ctypes.c_uint8 * len(dio)
         dio_val = dio_val()
 
-        res = cml.mlink_dio_read(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
+        res = cml.mlink_dio_read(
+            ctypes.pointer(self._linkfd),
+            ctypes.byref(dio_idx),
+            ctypes.byref(dio_val),
+            len(dio),
+        )
         self._raise_exception(res)
 
         val_list = list(dio_val)
@@ -432,8 +471,9 @@ class MLink:
             state = [state]
 
         if len(dio) != len(state):
-            raise MLinkError(
-                'dio_write: Number of channels and data is not equal!')
+            raise ValueError(
+                "dio_write: Number of channels and data is not equal!"
+            )
 
         dio_idx = ctypes.c_uint8 * len(dio)
         dio_idx = dio_idx(*dio)
@@ -441,7 +481,12 @@ class MLink:
         dio_val = ctypes.c_uint8 * len(dio)
         dio_val = dio_val(*state)
 
-        res = cml.mlink_dio_write(ctypes.pointer(self._linkfd), ctypes.byref(dio_idx), ctypes.byref(dio_val), len(dio))
+        res = cml.mlink_dio_write(
+            ctypes.pointer(self._linkfd),
+            ctypes.byref(dio_idx),
+            ctypes.byref(dio_val),
+            len(dio),
+        )
         self._raise_exception(res)
 
     @_connect_decorate
@@ -455,13 +500,15 @@ class MLink:
         """
 
         value = ctypes.c_uint8()
-        res = cml.mlink_func_read(ctypes.pointer(self._linkfd), key, ctypes.pointer(value))
+        res = cml.mlink_func_read(
+            ctypes.pointer(self._linkfd), key, ctypes.pointer(value)
+        )
         self._raise_exception(res)
 
         return value.value
 
     @_connect_decorate
-    def led_write(self, led_id, state):
+    def led_write(self, led, state):
         """
         Description:
             Sets MicroDAQ LEDs state
@@ -471,60 +518,63 @@ class MLink:
             state - LED state (True - ON, False - OFF)
         """
 
-        res = cml.mlink_led_write(ctypes.pointer(self._linkfd), led_id, state)
+        res = cml.mlink_led_write(ctypes.pointer(self._linkfd), led, state)
         self._raise_exception(res)
 
     @_connect_decorate
-    def enc_init(self, encoder, mode=0, init_value=0):
+    def enc_init(self, module, mode=0, init_value=0):
         """
         Description:
             Initializes encoder module
         Usage:
             enc_init(encoder, init_value)
-            encoder - encoder module (1 or 2)
-            mode - mode - encoder counter mode 
+            module - encoder module (1 or 2)
+            mode - mode - encoder counter mode
                 0 - quadrature - ENCxA and ENCxB inputs are used for A and B channels
-                1 - dir - ENCxA input will provide the clock for position counter and the ENCxB 
-                          input will have the direction information. The position counteris 
-                          incremented on every rising edge of ENCxA input when the direction 
+                1 - dir - ENCxA input will provide the clock for position counter and the ENCxB
+                          input will have the direction information. The position counteris
+                          incremented on every rising edge of ENCxA input when the direction
                           input is high and decremented when the direction input is low.
                 2 - up - position counter is incremented on both edges of the ENCxA input.
                 3 - down - position counter is decremented on both edges of the ENCxA input.
             init_value - initial encoder value
         """
 
-        res = cml.mlink_enc_init(ctypes.pointer(self._linkfd), encoder, mode, init_value)
+        res = cml.mlink_enc_init(
+            ctypes.pointer(self._linkfd), module, mode, init_value
+        )
         self._raise_exception(res)
 
     @_connect_decorate
-    def enc_read(self, encoder):
+    def enc_read(self, module):
         """
         Description:
             Reads encoder position and motion direction
         Usage:
             enc_read(encoder)
-            encoder - encoder module (1 or 2)
+            module - encoder module (1 or 2)
         """
 
         enc_dir = ctypes.c_uint8()
         position = ctypes.c_int32()
         res = cml.mlink_enc_read(
             ctypes.pointer(self._linkfd),
-            encoder,
+            module,
             ctypes.pointer(enc_dir),
-            ctypes.pointer(position))
+            ctypes.pointer(position),
+        )
 
         self._raise_exception(res)
         return position.value, enc_dir.value
 
     @_connect_decorate
-    def pwm_init(self, pwm_module, period, active_low=False, duty_a=0, duty_b=0):
+    def pwm_init(self, module, period, active_low=False, duty_a=0, duty_b=0):
         """
         Description:
             Setup MicroDAQ PWM outputs
         Usage:
             pwm_init(module, period, active_low=False, duty_a=0, duty_b=0)
-            pwm_module - PWM module (1, 2 or 3)
+            module - PWM module (1, 2 or 3)
             period - PWM module period in microseconds(1-1000000)
             active_low - PWM waveform polarity (True or False)
             duty_a - PWM channel A duty (0-100)
@@ -533,11 +583,12 @@ class MLink:
 
         res = cml.mlink_pwm_init(
             ctypes.pointer(self._linkfd),
-            pwm_module,
+            module,
             period,
             active_low,
             duty_a,
-            duty_b)
+            duty_b,
+        )
 
         self._raise_exception(res)
 
@@ -554,15 +605,15 @@ class MLink:
         """
 
         res = cml.mlink_pwm_write(
-            ctypes.pointer(self._linkfd),
-            module,
-            duty_a,
-            duty_b)
+            ctypes.pointer(self._linkfd), module, duty_a, duty_b
+        )
 
         self._raise_exception(res)
 
     @_connect_decorate
-    def ai_read(self, channels, ai_range=AIRange.AI_10V, is_differential=False):
+    def ai_read(
+        self, channels, ai_range=AIRange.AI_10V, is_differential=False
+    ):
         """
         Description:
             Reads MicroDAQ analog inputs
@@ -575,16 +626,25 @@ class MLink:
                 AI_5V      - [-5, 5]
                 AI_5_12V   - [-5.12, 5.12]
                 AI_2V      - [-2, 2]
-                AI_2_56V   - [-2.56, 2.56]  
+                AI_2_56V   - [-2.56, 2.56]
                 AI_1V      - [-1, 1]
                 AI_1_24V   - [-1.24, 1.24]
                 AI_0_64V   - [-0.64, 0.64]
                 AIRange.AI_10V  -    single-range argument applied for all used channels
                 AIRange.AI_10V  + AIRange.AI_5V  - multi-range argument for two channels
 
-            is_differential - scalar or array with measurement mode settings: 
-                              True  - differential 
+            is_differential - scalar or array with measurement mode settings:
+                              True  - differential
                               False - single-ended mode
+
+        Return:
+            Voltage on every 'channel'. Float type if 'channel' parameter is
+            a single int (scalar), a list of floats if 'channel' parameter
+            is a list of ints.
+
+            [value1, value2] = ai_read([1, 2])
+            [value] =  ai_read([1])
+            value = ai_read(1)
         """
 
         if not isinstance(channels, list):
@@ -598,17 +658,19 @@ class MLink:
             for i in range(len(channels) - 1):
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
-            raise MLinkError(
-                'ai_read: Mode (is_differential parameter) vector'
-                ' should match selected AI channels')
+            raise ValueError(
+                "ai_read: Mode (is_differential parameter) vector"
+                " should match selected AI channels"
+            )
 
         if len(ai_range) == 2 and len(channels) != 1:
             range_cpy = ai_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
-            raise MLinkError(
-                'ai_read: Range vector should match selected AI channels!')
+            raise ValueError(
+                "ai_read: Range vector should match selected AI channels!"
+            )
 
         channels_idx = ctypes.c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
@@ -626,18 +688,22 @@ class MLink:
             len(channels),
             ctypes.byref(channels_range),
             ctypes.byref(diff),
-            ctypes.byref(channels_val))
+            ctypes.byref(channels_val),
+        )
 
         self._raise_exception(res)
 
         val_list = [channels_val[i] for i in range(len(channels))]
-        if len(val_list) == 1:
+
+        if not isinstance(channels, list):
             return val_list[0]
         else:
             return val_list
 
     @_connect_decorate
-    def ai_scan_init(self, channels, ai_range, is_differential, rate, duration):
+    def ai_scan_init(
+        self, channels, ai_range, is_differential, rate, duration
+    ):
         """
         Description:
             Initiates analog input scanning session
@@ -673,18 +739,20 @@ class MLink:
             for i in range(len(channels) - 1):
                 is_differential = is_differential + is_differential_cpy
         elif len(channels) != len(is_differential):
-            raise MLinkError(
-                'ai_scan_init: Mode (is_differential parameter) '
-                'vector should match selected AI channels')
+            raise ValueError(
+                "ai_scan_init: Mode (is_differential parameter) "
+                "vector should match selected AI channels"
+            )
 
         if len(ai_range) == 2 and len(channels) != 1:
             range_cpy = ai_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ai_range = ai_range + range_cpy
         elif len(channels) != len(ai_range) / 2:
-            raise MLinkError(
-                'ai_scan_init: Range vector should'
-                ' match selected AI channels!')
+            raise ValueError(
+                "ai_scan_init: Range vector should"
+                " match selected AI channels!"
+            )
 
         if duration < 0:
             duration = -1
@@ -705,7 +773,8 @@ class MLink:
             channels_range,
             ctypes.byref(diff),
             ctypes.pointer(rate),
-            duration)
+            duration,
+        )
 
         self._raise_exception(res)
 
@@ -722,7 +791,7 @@ class MLink:
         if timeout > -1:
             timeout = timeout * 1000
 
-        data_len = scan_count*len(self._ai_scan_channels)
+        data_len = scan_count * len(self._ai_scan_channels)
         channels_val = ctypes.c_double * data_len
         channels_val = channels_val()
 
@@ -730,13 +799,19 @@ class MLink:
             ctypes.pointer(self._linkfd),
             ctypes.byref(channels_val),
             scan_count,
-            timeout)
+            timeout,
+        )
 
         self._raise_exception(res)
 
         val_list = []
         for channel in range(0, len(self._ai_scan_channels)):
-            val_list.append([channels_val[i+channel] for i in range(0, scan_count, len(self._ai_scan_channels))])
+            val_list.append(
+                [
+                    channels_val[i + channel]
+                    for i in range(0, scan_count, len(self._ai_scan_channels))
+                ]
+            )
 
         if len(val_list) == 1:
             return val_list[0]
@@ -771,16 +846,18 @@ class MLink:
             ao_range = [ao_range]
 
         if len(channels) != len(data):
-            raise MLinkError(
-                'ao_read: Data vector should match selected AI channels!')
+            raise ValueError(
+                "ao_read: Data vector should match selected AI channels!"
+            )
 
         if len(ao_range) == 2 and len(channels) != 1:
             range_cpy = ao_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ao_range = ao_range + range_cpy
-        elif len(channels) != len(ao_range)/2:
-            raise MLinkError(
-                'ao_read: Range vector should match selected AI channels!')
+        elif len(channels) != len(ao_range) / 2:
+            raise ValueError(
+                "ao_read: Range vector should match selected AI channels!"
+            )
 
         channels_idx = ctypes.c_int8 * len(channels)
         channels_idx = channels_idx(*channels)
@@ -795,14 +872,15 @@ class MLink:
             len(channels),
             ctypes.byref(channels_range),
             1,
-            ctypes.byref(channels_val))
+            ctypes.byref(channels_val),
+        )
 
         self._raise_exception(res)
 
     @_connect_decorate
     def ao_scan_init(
-            self, channels, initial_data, ao_range,
-            is_stream_mode, rate, duration):
+        self, channels, initial_data, ao_range, is_stream_mode, rate, duration
+    ):
         """
         Description:
             Initiates analog output scanning session
@@ -835,11 +913,12 @@ class MLink:
 
         if len(ao_range) == 2 and len(channels) != 1:
             range_cpy = ao_range
-            for i in range(len(channels)-1):
+            for i in range(len(channels) - 1):
                 ao_range = ao_range + range_cpy
-        elif len(channels) != len(ao_range)/2:
-            raise MLinkError(
-                'ao_read: Range vector should match selected AI channels!')
+        elif len(channels) != len(ao_range) / 2:
+            raise ValueError(
+                "ao_read: Range vector should match selected AI channels!"
+            )
 
         data_size = 0
         if isinstance(initial_data[0], list):
@@ -847,7 +926,7 @@ class MLink:
             if all(len(x) == data_size_ch for x in initial_data):
                 pass
             else:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
 
             for ch_data in initial_data:
                 data_size = data_size + len(ch_data)
@@ -855,7 +934,7 @@ class MLink:
             initial_data = sum(initial_data, [])
         else:
             if len(channels) > 1:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
             data_size = len(initial_data)
 
         ao_data = ctypes.c_float * data_size
@@ -874,14 +953,15 @@ class MLink:
             ctypes.byref(channels_range),
             ctypes.c_uint8(is_stream_mode),
             ctypes.c_float(rate),
-            ctypes.c_float(duration))
+            ctypes.c_float(duration),
+        )
 
         self._raise_exception(res)
 
     @_connect_decorate
     def ao_scan_data(self, channels, data, opt=True):
         """
-        TODO: 
+        TODO:
         Description:
            Queues data to be output
         Usage:
@@ -904,7 +984,7 @@ class MLink:
             if all(len(x) == data_size_ch for x in data):
                 pass
             else:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
 
             for ch_data in data:
                 data_size = data_size + len(ch_data)
@@ -912,7 +992,7 @@ class MLink:
             data = sum(data, [])
         else:
             if len(channels) > 1:
-                raise MLinkError('Wrong AO scan data size.')
+                raise ValueError("Wrong AO scan data size.")
             data_size = len(data)
 
         ch_len = len(channels)
@@ -928,7 +1008,8 @@ class MLink:
             ctypes.c_int(ch_len),
             ctypes.byref(ao_data),
             ctypes.c_int(data_size),
-            ctypes.c_uint8(opt))
+            ctypes.c_uint8(opt),
+        )
 
         self._raise_exception(res)
 
@@ -957,14 +1038,16 @@ class MLink:
         if timeout > -1:
             timeout = timeout * 1000
 
-        res = cml.mlink_ao_scan_wait_until_done(ctypes.pointer(self._linkfd), timeout)
+        res = cml.mlink_ao_scan_wait_until_done(
+            ctypes.pointer(self._linkfd), timeout
+        )
         self._raise_exception(res)
 
         if res == 0:
             return False
         elif res == 1:
-            return True 
-        
+            return True
+
     @_connect_decorate
     def ao_scan_is_done(self):
         """
@@ -980,7 +1063,7 @@ class MLink:
         if res == 0:
             return False
         elif res == 1:
-            return True 
+            return True
 
     @_connect_decorate
     def ao_scan_stop(self):
@@ -1018,13 +1101,11 @@ class MLink:
         """
 
         res = cml.mlink_scan_trigger_dio(
-            ctypes.pointer(self._linkfd),
-            Triggers.AI_TRIGGER,
-            dio,
-            level)
+            ctypes.pointer(self._linkfd), Triggers.AI_TRIGGER, dio, level
+        )
 
         self._raise_exception(res)
-        
+
     @_connect_decorate
     def ai_scan_trigger_clear(self):
         """
@@ -1035,8 +1116,8 @@ class MLink:
         """
 
         res = cml.mlink_scan_trigger_clear(
-            ctypes.pointer(self._linkfd),
-            Triggers.AI_TRIGGER)
+            ctypes.pointer(self._linkfd), Triggers.AI_TRIGGER
+        )
 
         self._raise_exception(res)
 
@@ -1059,8 +1140,9 @@ class MLink:
         res = cml.mlink_scan_trigger_dio_pattern(
             ctypes.pointer(self._linkfd),
             Triggers.AI_TRIGGER,
-            pattern,
-            len(pattern))
+            pattern.encode("ascii"),
+            len(pattern),
+        )
 
         self._raise_exception(res)
 
@@ -1084,7 +1166,8 @@ class MLink:
             Triggers.AI_TRIGGER,
             module,
             position,
-            condition)
+            condition,
+        )
 
         self._raise_exception(res)
 
@@ -1102,11 +1185,11 @@ class MLink:
         """
 
         res = cml.mlink_scan_trigger_external_start(
-            ctypes.pointer(self._linkfd),
-            Triggers.AI_TRIGGER, source)
+            ctypes.pointer(self._linkfd), Triggers.AI_TRIGGER, source
+        )
 
         self._raise_exception(res)
-        
+
     @_connect_decorate
     def ao_scan_trigger_dio(self, dio, level):
         """
@@ -1119,13 +1202,11 @@ class MLink:
         """
 
         res = cml.mlink_scan_trigger_dio(
-            ctypes.pointer(self._linkfd),
-            Triggers.AO_TRIGGER,
-            dio,
-            level)
+            ctypes.pointer(self._linkfd), Triggers.AO_TRIGGER, dio, level
+        )
 
         self._raise_exception(res)
-        
+
     @_connect_decorate
     def ao_scan_trigger_clear(self):
         """
@@ -1136,8 +1217,8 @@ class MLink:
         """
 
         res = cml.mlink_scan_trigger_clear(
-            ctypes.pointer(self._linkfd),
-            Triggers.AO_TRIGGER)
+            ctypes.pointer(self._linkfd), Triggers.AO_TRIGGER
+        )
 
         self._raise_exception(res)
 
@@ -1160,8 +1241,9 @@ class MLink:
         res = cml.mlink_scan_trigger_dio_pattern(
             ctypes.pointer(self._linkfd),
             Triggers.AO_TRIGGER,
-            pattern,
-            len(pattern))
+            pattern.encode("ascii"),
+            len(pattern),
+        )
 
         self._raise_exception(res)
 
@@ -1179,12 +1261,13 @@ class MLink:
             condition - 1: trigger when encoder value is greater than position parameter
                         0: trigger when encoder value is lower than poisiotn parameter
         """
-
         res = cml.mlink_scan_trigger_encoder(
             ctypes.pointer(self._linkfd),
             Triggers.AO_TRIGGER,
             module,
-            condition)
+            position,
+            condition,
+        )
 
         self._raise_exception(res)
 
@@ -1202,8 +1285,7 @@ class MLink:
         """
 
         res = cml.mlink_scan_trigger_external_start(
-            ctypes.pointer(self._linkfd),
-            Triggers.AO_TRIGGER,
-            source)
+            ctypes.pointer(self._linkfd), Triggers.AO_TRIGGER, source
+        )
 
         self._raise_exception(res)
