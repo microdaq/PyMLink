@@ -374,6 +374,21 @@ class Device:
         return val_list
 
     @_connect_decorate
+    def dsp_write_raw_mem(self, offset, data):
+        
+        raw_data = ctypes.c_uint8 * len(data)
+        raw_data = raw_data(*data)
+
+        res = cml.mlink_mem_set(
+            ctypes.pointer(self._linkfd),
+            offset,
+            ctypes.byref(raw_data),
+            len(data),
+        )
+
+        self._raise_exception(res)
+
+    @_connect_decorate
     def dsp_stop(self):
         """
         Description:
