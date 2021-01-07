@@ -1,0 +1,26 @@
+
+name: MicroDAQ basic tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: LED test
+      run: |
+        python3 examples/led.py
+        
+    - name: MicroDAQ firmware version 
+      run: |
+        python3 examples/mdaq_version.py
+
+    - name: MicroDAQ connection test
+      run: |
+        python3 examples/connection.py
+
+        
