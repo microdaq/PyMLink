@@ -7,3 +7,4 @@ from microdaq.device import MLinkError
 from microdaq.device import AIRange
 from microdaq.device import AORange
 from microdaq.device import Triggers
+from microdaq.app import App

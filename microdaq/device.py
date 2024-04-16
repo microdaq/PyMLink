@@ -242,6 +242,16 @@ class Device:
 
         return tuple(self._mdaq_hwid)
 
+    def get_ip(self):
+        """
+        Description:
+            Returns IP address of MicroDAQ device
+        Usage:
+            ip = get_ip()
+        """
+
+        return self._ip
+
     @_connect_decorate
     def dsp_init(self, dsp_application, rate, duration):
         """
